@@ -37,16 +37,16 @@ export function inicializarJogo(navegarPara, aoVoltarSelecao) {
   webglInicializado = true;
 
   // Botão de voltar à seleção
-  document.getElementById('btn-voltar-selecao').addEventListener('click', () => {
+  document.getElementById('botao-voltar-selecao').addEventListener('click', () => {
     if (aoVoltarSelecaoFn) aoVoltarSelecaoFn();
     navegarPara('selecao');
   });
 
   // Verificar vitória
-  document.getElementById('btn-verificar').addEventListener('click', verificarVitoria);
+  document.getElementById('botao-verificar').addEventListener('click', verificarVitoria);
 
   // Fechar diálogo
-  document.getElementById('btn-fechar-dialogo').addEventListener('click', () => {
+  document.getElementById('botao-fechar-dialogo').addEventListener('click', () => {
     document.getElementById('barra-dialogo').hidden = true;
   });
 

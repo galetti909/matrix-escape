@@ -76,30 +76,30 @@ input:focus-visible {
   outline-offset: 2px;
 }
 
-.btn-primario {
+.botao-primario {
   background-color: var(--cor-primaria);
   color: #fff;
   font-weight: bold;
   letter-spacing: 1px;
 }
 
-.btn-primario:hover {
+.botao-primario:hover {
   background-color: var(--cor-primaria-hover);
 }
 
-.btn-secundario {
+.botao-secundario {
   background-color: transparent;
   color: var(--cor-texto-fraco);
   border: 1px solid var(--cor-borda);
   margin-top: 8px;
 }
 
-.btn-secundario:hover {
+.botao-secundario:hover {
   color: var(--cor-texto);
   border-color: var(--cor-texto-fraco);
 }
 
-.btn-voltar {
+.botao-voltar {
   background-color: transparent;
   color: var(--cor-texto-fraco);
   padding: 4px 8px;
@@ -107,7 +107,7 @@ input:focus-visible {
   border: 1px solid var(--cor-borda);
 }
 
-.btn-voltar:hover {
+.botao-voltar:hover {
   color: var(--cor-texto);
 }
 

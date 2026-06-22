@@ -92,7 +92,7 @@
   font-family: var(--fonte-principal);
 }
 
-.btn-usar-template {
+.botao-usar-template {
   background-color: var(--cor-destaque);
   color: #000;
   font-size: 11px;
@@ -102,7 +102,7 @@
   white-space: nowrap;
 }
 
-.btn-usar-template:hover {
+.botao-usar-template:hover {
   opacity: 0.85;
 }
 
@@ -213,7 +213,7 @@
 }
 
 /* Seção esquerda do construtor: só a matriz */
-#construtor-matriz-wrap {
+#construtor-matriz-container {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -221,8 +221,8 @@
 }
 
 /* Colchetes decorativos ao redor da matriz */
-#construtor-matriz-wrap::before,
-#construtor-matriz-wrap::after {
+#construtor-matriz-container::before,
+#construtor-matriz-container::after {
   content: '';
   position: absolute;
   top: 0;
@@ -231,13 +231,13 @@
   border: 2px solid var(--cor-texto-fraco);
 }
 
-#construtor-matriz-wrap::before {
+#construtor-matriz-container::before {
   left: -8px;
   border-right: none;
   border-radius: 3px 0 0 3px;
 }
 
-#construtor-matriz-wrap::after {
+#construtor-matriz-container::after {
   right: -8px;
   border-left: none;
   border-radius: 0 3px 3px 0;
@@ -289,7 +289,7 @@
   gap: 3px;
 }
 
-.calc-btn {
+.botao-calculadora {
   background-color: var(--cor-fundo-painel-alt);
   border: 1px solid var(--cor-borda);
   color: var(--cor-destaque);
@@ -301,7 +301,7 @@
   transition: background-color 0.1s, border-color 0.1s;
 }
 
-.calc-btn:hover {
+.botao-calculadora:hover {
   border-color: var(--cor-destaque);
   background-color: rgba(76, 201, 240, 0.12);
 }
@@ -312,7 +312,7 @@
   gap: 6px;
 }
 
-.btn-acao {
+.botao-acao {
   flex: 1;
   background-color: var(--cor-fundo-painel-alt);
   border: 1px solid var(--cor-borda);
@@ -325,16 +325,16 @@
   box-shadow: inset 0 1px rgba(255, 255, 255, 0.025);
 }
 
-.btn-acao:hover {
+.botao-acao:hover {
   border-color: var(--cor-texto-fraco);
 }
 
-#btn-add-sequencia {
+#botao-adicionar-sequencia {
   border-color: var(--cor-destaque);
   color: var(--cor-destaque);
 }
 
-#btn-add-sequencia:hover {
+#botao-adicionar-sequencia:hover {
   background-color: var(--cor-destaque);
   color: #000;
   box-shadow: 0 0 16px rgba(76, 201, 240, 0.25);
@@ -385,7 +385,7 @@
   align-content: flex-start;
 }
 
-.seq-item {
+.sequencia-item {
   display: flex;
   align-items: center;
   gap: 2px;
@@ -397,7 +397,7 @@
   white-space: nowrap;
 }
 
-.seq-item-nome {
+.sequencia-item-nome {
   color: var(--cor-destaque);
   font-size: 11px;
   font-family: var(--fonte-principal);
@@ -406,8 +406,8 @@
   text-overflow: ellipsis;
 }
 
-.seq-btn-mover,
-.seq-btn-remover {
+.sequencia-botao-mover,
+.sequencia-botao-remover {
   background: transparent;
   border: none;
   color: var(--cor-texto-fraco);
@@ -416,12 +416,12 @@
   line-height: 1;
 }
 
-.seq-btn-mover:hover,
-.seq-btn-remover:hover {
+.sequencia-botao-mover:hover,
+.sequencia-botao-remover:hover {
   color: var(--cor-texto);
 }
 
-.seq-btn-mover:disabled {
+.sequencia-botao-mover:disabled {
   opacity: 0.2;
   cursor: default;
 }
@@ -451,14 +451,14 @@
   color: var(--cor-texto-fraco);
 }
 
-#resultado-matriz-wrap {
+#resultado-matriz-container {
   display: flex;
   align-items: center;
   position: relative;
 }
 
-#resultado-matriz-wrap::before,
-#resultado-matriz-wrap::after {
+#resultado-matriz-container::before,
+#resultado-matriz-container::after {
   content: '';
   position: absolute;
   top: 0;
@@ -468,12 +468,12 @@
   opacity: 0.5;
 }
 
-#resultado-matriz-wrap::before {
+#resultado-matriz-container::before {
   left: -6px;
   border-right: none;
 }
 
-#resultado-matriz-wrap::after {
+#resultado-matriz-container::after {
   right: -6px;
   border-left: none;
 }
@@ -504,7 +504,7 @@
   flex-shrink: 0;
 }
 
-#btn-verificar {
+#botao-verificar {
   padding: 8px 20px;
   font-size: 13px;
   white-space: nowrap;
@@ -539,20 +539,20 @@
   gap: 14px;
 }
 
-#modal-tmpl-titulo {
+#modal-template-titulo {
   font-size: 16px;
   color: var(--cor-destaque);
   letter-spacing: 1px;
   font-family: var(--fonte-principal);
 }
 
-#modal-tmpl-params {
+#modal-template-parametros {
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
 
-.modal-param-label {
+.modal-parametro-label {
   font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 1px;
@@ -561,19 +561,19 @@
   display: block;
 }
 
-.modal-param-input {
+.modal-parametro-input {
   width: 100%;
   font-size: 14px;
   height: 38px;
 }
 
-#modal-calc {
+#modal-calculadora {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 4px;
 }
 
-.modal-calc-btn {
+.modal-calculadora-botao {
   font-size: 13px;
   padding: 6px 4px;
 }

@@ -59,7 +59,7 @@
   max-width: 800px;
 }
 
-#btn-fechar-dialogo {
+#botao-fechar-dialogo {
   background: transparent;
   border: 1px solid var(--cor-borda);
   color: var(--cor-texto-fraco);
@@ -74,7 +74,7 @@
   padding: 0;
 }
 
-#btn-fechar-dialogo:hover {
+#botao-fechar-dialogo:hover {
   border-color: var(--cor-texto);
   color: var(--cor-texto);
 }

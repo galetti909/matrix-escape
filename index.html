@@ -20,14 +20,14 @@
         Você foi sequestrado pelo professor e está preso dentro de um navegador.<br>
         A única saída é dominar as transformações matriciais.
       </p>
-      <button id="btn-iniciar" class="btn-primario">Iniciar</button>
+      <button id="botao-iniciar" class="botao-primario">Iniciar</button>
     </div>
   </div>
 
   <!-- Tela de seleção de fases -->
   <div id="tela-selecao" class="tela" hidden>
     <div id="selecao-header">
-      <button id="btn-voltar-menu" class="btn-voltar">← Menu</button>
+      <button id="botao-voltar-menu" class="botao-voltar">← Menu</button>
       <h2>Selecionar Fase</h2>
     </div>
     <div id="grade-mundos"></div>
@@ -46,7 +46,7 @@
       <!-- Área central: canvas + info da fase -->
       <main id="area-central">
         <div id="fase-info">
-          <button id="btn-voltar-selecao" class="btn-voltar">← Fases</button>
+          <button id="botao-voltar-selecao" class="botao-voltar">← Fases</button>
           <span id="fase-nome"></span>
         </div>
         <div id="canvas-wrapper">
@@ -70,23 +70,23 @@
       <section id="painel-construtor">
         <h3 class="painel-titulo" id="titulo-construtor">Construtor</h3>
         <div id="construtor-corpo">
-          <div id="construtor-matriz-wrap">
+          <div id="construtor-matriz-container">
             <div id="grid-matriz"></div>
           </div>
           <div id="construtor-lateral">
             <div id="calculadora">
-              <button class="calc-btn">sin(</button>
-              <button class="calc-btn">cos(</button>
-              <button class="calc-btn">tan(</button>
-              <button class="calc-btn">√(</button>
-              <button class="calc-btn">π</button>
-              <button class="calc-btn">e</button>
-              <button class="calc-btn">π/2</button>
-              <button class="calc-btn">π/4</button>
+              <button class="botao-calculadora">sin(</button>
+              <button class="botao-calculadora">cos(</button>
+              <button class="botao-calculadora">tan(</button>
+              <button class="botao-calculadora">√(</button>
+              <button class="botao-calculadora">π</button>
+              <button class="botao-calculadora">e</button>
+              <button class="botao-calculadora">π/2</button>
+              <button class="botao-calculadora">π/4</button>
             </div>
             <div id="construtor-acoes">
-              <button id="btn-salvar-matriz" class="btn-acao">Salvar</button>
-              <button id="btn-add-sequencia" class="btn-acao">+ Sequência</button>
+              <button id="botao-salvar-matriz" class="botao-acao">Salvar</button>
+              <button id="botao-adicionar-sequencia" class="botao-acao">+ Sequência</button>
             </div>
           </div>
         </div>
@@ -101,12 +101,12 @@
         <div id="resultado-area">
           <div id="resultado-lado">
             <span id="resultado-label">Resultado:</span>
-            <div id="resultado-matriz-wrap">
+            <div id="resultado-matriz-container">
               <div id="grid-resultado"></div>
             </div>
           </div>
           <div id="sequencia-acoes">
-            <button id="btn-verificar" class="btn-primario">Verificar</button>
+            <button id="botao-verificar" class="botao-primario">Verificar</button>
           </div>
         </div>
       </section>
@@ -116,21 +116,21 @@
     <!-- Modal para parâmetros de template -->
     <div id="modal-template" hidden>
       <div id="modal-box">
-        <h3 id="modal-tmpl-titulo"></h3>
-        <div id="modal-tmpl-params"></div>
-        <div id="modal-calc">
-          <button class="calc-btn modal-calc-btn">sin(</button>
-          <button class="calc-btn modal-calc-btn">cos(</button>
-          <button class="calc-btn modal-calc-btn">√(</button>
-          <button class="calc-btn modal-calc-btn">π</button>
-          <button class="calc-btn modal-calc-btn">π/2</button>
-          <button class="calc-btn modal-calc-btn">π/4</button>
-          <button class="calc-btn modal-calc-btn">π/3</button>
-          <button class="calc-btn modal-calc-btn">π/6</button>
+        <h3 id="modal-template-titulo"></h3>
+        <div id="modal-template-parametros"></div>
+        <div id="modal-calculadora">
+          <button class="botao-calculadora modal-calculadora-botao">sin(</button>
+          <button class="botao-calculadora modal-calculadora-botao">cos(</button>
+          <button class="botao-calculadora modal-calculadora-botao">√(</button>
+          <button class="botao-calculadora modal-calculadora-botao">π</button>
+          <button class="botao-calculadora modal-calculadora-botao">π/2</button>
+          <button class="botao-calculadora modal-calculadora-botao">π/4</button>
+          <button class="botao-calculadora modal-calculadora-botao">π/3</button>
+          <button class="botao-calculadora modal-calculadora-botao">π/6</button>
         </div>
         <div id="modal-acoes">
-          <button id="modal-btn-cancelar" class="btn-secundario">Cancelar</button>
-          <button id="modal-btn-confirmar" class="btn-primario">Usar →</button>
+          <button id="modal-botao-cancelar" class="botao-secundario">Cancelar</button>
+          <button id="modal-botao-confirmar" class="botao-primario">Usar →</button>
         </div>
       </div>
     </div>
@@ -140,7 +140,7 @@
       <div id="dialogo-avatar"></div>
       <div id="dialogo-balao">
         <p id="dialogo-texto"></p>
-        <button id="btn-fechar-dialogo">✕</button>
+        <button id="botao-fechar-dialogo">✕</button>
       </div>
     </div>
 
@@ -151,7 +151,7 @@
     <div id="creditos-container">
       <h1>Você escapou!</h1>
       <p>Parabéns — você dominou as transformações matriciais.</p>
-      <button id="btn-voltar-inicio" class="btn-primario">Voltar ao início</button>
+      <button id="botao-voltar-inicio" class="botao-primario">Voltar ao início</button>
     </div>
   </div>
 

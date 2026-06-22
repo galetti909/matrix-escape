@@ -18,7 +18,7 @@ export function inicializarSelecao(navegarPara, aoSelecionarFase) {
   _navegarPara = navegarPara;
   _aoSelecionarFase = aoSelecionarFase;
 
-  const btnVoltar = document.getElementById('btn-voltar-menu');
+  const btnVoltar = document.getElementById('botao-voltar-menu');
   btnVoltar.addEventListener('click', () => navegarPara('menu'));
 }
 

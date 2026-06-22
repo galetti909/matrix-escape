@@ -48,7 +48,7 @@ export function renderizarConstrutor() {
 
 // Insere valor da calculadora na célula ativa
 export function registrarCalculadora() {
-  document.querySelectorAll('.calc-btn').forEach((btn) => {
+  document.querySelectorAll('.botao-calculadora').forEach((btn) => {
     btn.addEventListener('click', () => {
       if (estado.celulaAtiva === null) return;
       const val = btn.textContent;
@@ -74,7 +74,7 @@ export function obterMatrizConstrutor() {
 // --- Salvar matriz ---
 
 export function registrarSalvarMatriz() {
-  document.getElementById('btn-salvar-matriz').addEventListener('click', salvarMatrizAtual);
+  document.getElementById('botao-salvar-matriz').addEventListener('click', salvarMatrizAtual);
 }
 
 function salvarMatrizAtual() {
@@ -124,7 +124,7 @@ function carregarSalvaNoConstutor(idx) {
 // --- Sequência ---
 
 export function registrarSequencia() {
-  document.getElementById('btn-add-sequencia').addEventListener('click', () => {
+  document.getElementById('botao-adicionar-sequencia').addEventListener('click', () => {
     const matriz = obterMatrizConstrutor();
     if (!matriz) {
       destacarErro();
@@ -152,16 +152,16 @@ export function renderizarSequencia() {
 
   seq.forEach((item, idx) => {
     const li = document.createElement('li');
-    li.className = 'seq-item';
+    li.className = 'sequencia-item';
 
     const nome = document.createElement('span');
-    nome.className = 'seq-item-nome';
+    nome.className = 'sequencia-item-nome';
     nome.textContent = item.rotulo || item.nome || `M${idx + 1}`;
     li.appendChild(nome);
 
     // Botão de remover
     const btnRem = document.createElement('button');
-    btnRem.className = 'seq-btn-remover';
+    btnRem.className = 'sequencia-botao-remover';
     btnRem.textContent = '✕';
     btnRem.addEventListener('click', () => {
       estado.sequencias[estado.objetoAtivo].splice(idx, 1);
@@ -171,7 +171,7 @@ export function renderizarSequencia() {
 
     // Mover para cima
     const btnUp = document.createElement('button');
-    btnUp.className = 'seq-btn-mover';
+    btnUp.className = 'sequencia-botao-mover';
     btnUp.textContent = '↑';
     btnUp.disabled = idx === 0;
     btnUp.addEventListener('click', () => {
@@ -183,7 +183,7 @@ export function renderizarSequencia() {
 
     // Mover para baixo
     const btnDown = document.createElement('button');
-    btnDown.className = 'seq-btn-mover';
+    btnDown.className = 'sequencia-botao-mover';
     btnDown.textContent = '↓';
     btnDown.disabled = idx === seq.length - 1;
     btnDown.addEventListener('click', () => {
@@ -327,7 +327,7 @@ export function renderizarTemplates() {
     li.appendChild(nome);
 
     const btnUsar = document.createElement('button');
-    btnUsar.className = 'btn-usar-template';
+    btnUsar.className = 'botao-usar-template';
     btnUsar.textContent = 'Usar';
     btnUsar.addEventListener('click', () => abrirModalTemplate(tmpl));
     li.appendChild(btnUsar);
@@ -343,18 +343,18 @@ let _tmplPendente = null;
 function abrirModalTemplate(tmpl) {
   _tmplPendente = tmpl;
   const modal = document.getElementById('modal-template');
-  document.getElementById('modal-tmpl-titulo').textContent = tmpl.nome;
+  document.getElementById('modal-template-titulo').textContent = tmpl.nome;
 
-  const container = document.getElementById('modal-tmpl-params');
+  const container = document.getElementById('modal-template-parametros');
   container.innerHTML = '';
   tmpl.params.forEach((nomep) => {
     const label = document.createElement('label');
-    label.className = 'modal-param-label';
+    label.className = 'modal-parametro-label';
     label.textContent = nomep;
 
     const input = document.createElement('input');
     input.type = 'text';
-    input.className = 'celula-matriz modal-param-input';
+    input.className = 'celula-matriz modal-parametro-input';
     input.placeholder = `ex: π/4 ou 1.5`;
     input.dataset.param = nomep;
 
@@ -370,7 +370,7 @@ function abrirModalTemplate(tmpl) {
   if (primeiro) setTimeout(() => primeiro.focus(), 50);
 
   // Calculadora do modal insere no input ativo
-  document.querySelectorAll('.modal-calc-btn').forEach((btn) => {
+  document.querySelectorAll('.modal-calculadora-botao').forEach((btn) => {
     btn.onclick = () => {
       const ativo = container.querySelector('input[data-ativo="1"]') || container.querySelector('input');
       if (!ativo) return;
@@ -389,7 +389,7 @@ function confirmarModalTemplate() {
   const tmpl = _tmplPendente;
   if (!tmpl) return;
 
-  const inputs = document.querySelectorAll('#modal-tmpl-params .modal-param-input');
+  const inputs = document.querySelectorAll('#modal-template-parametros .modal-parametro-input');
   const params = [];
   let erro = false;
 
@@ -431,8 +431,8 @@ function confirmarModalTemplate() {
 }
 
 export function registrarModalTemplate() {
-  document.getElementById('modal-btn-confirmar').addEventListener('click', confirmarModalTemplate);
-  document.getElementById('modal-btn-cancelar').addEventListener('click', () => {
+  document.getElementById('modal-botao-confirmar').addEventListener('click', confirmarModalTemplate);
+  document.getElementById('modal-botao-cancelar').addEventListener('click', () => {
     document.getElementById('modal-template').hidden = true;
     _tmplPendente = null;
   });

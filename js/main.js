@@ -34,7 +34,7 @@ function inicializar() {
   // Passa renderizarGrade como callback para jogo.js não depender de select.js
   inicializarJogo(navegarPara, () => renderizarGrade());
 
-  document.getElementById('btn-voltar-inicio').addEventListener('click', () => {
+  document.getElementById('botao-voltar-inicio').addEventListener('click', () => {
     navegarPara('menu');
   });
 
