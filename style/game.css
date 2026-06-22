@@ -1,0 +1,602 @@
+/* Layout da tela de jogo: painéis laterais, central e inferiores */
+
+#tela-jogo {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  padding: 0;
+  overflow: hidden;
+}
+
+/* Área superior: painéis laterais + canvas central */
+.jogo-layout {
+  display: grid;
+  grid-template-columns: var(--largura-painel-lateral) 1fr var(--largura-painel-lateral);
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* ── Painéis laterais ─────────────────────────────────────────────────────── */
+
+.painel-esquerdo,
+.painel-direito {
+  background: linear-gradient(180deg, #121622 0%, var(--cor-fundo-painel) 100%);
+  border-right: 1px solid var(--cor-borda);
+  padding: var(--espacamento);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.painel-direito {
+  border-right: none;
+  border-left: 1px solid var(--cor-borda);
+}
+
+.painel-direito[hidden] {
+  display: none !important;
+}
+
+/* Lista de matrizes salvas — grade de chips centralizados */
+.lista-salvas {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: center;
+}
+
+.salva-item {
+  background-color: var(--cor-fundo-painel-alt);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-borda);
+  padding: 6px 12px;
+  cursor: pointer;
+  font-weight: bold;
+  color: var(--cor-destaque);
+  font-size: 14px;
+  transition: border-color 0.15s, background-color 0.15s;
+  text-align: center;
+}
+
+.salva-item:hover {
+  border-color: var(--cor-destaque);
+  background-color: rgba(76, 201, 240, 0.08);
+}
+
+/* Templates */
+.lista-templates {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.template-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: var(--cor-fundo-painel-alt);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-borda);
+  padding: 7px 8px;
+  font-size: 12px;
+}
+
+.template-nome {
+  flex: 1;
+  color: var(--cor-texto);
+  font-family: var(--fonte-principal);
+}
+
+.btn-usar-template {
+  background-color: var(--cor-destaque);
+  color: #000;
+  font-size: 11px;
+  font-weight: bold;
+  padding: 3px 10px;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+
+.btn-usar-template:hover {
+  opacity: 0.85;
+}
+
+/* ── Área central ─────────────────────────────────────────────────────────── */
+
+.area-central {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--espacamento);
+  gap: var(--espacamento);
+  background-color: var(--cor-fundo);
+  min-height: 0;
+  position: relative;
+}
+
+.fase-info {
+  display: flex;
+  align-items: center;
+  gap: var(--espacamento);
+  width: 100%;
+}
+
+.fase-nome {
+  font-size: 13px;
+  color: var(--cor-texto-fraco);
+  letter-spacing: 1px;
+}
+
+.canvas-wrapper {
+  position: relative;
+  max-width: 100%;
+  max-height: calc(100% - 48px);
+  display: flex;
+}
+
+#canvas-jogo {
+  border: 1px solid #39435a;
+  border-radius: var(--raio-borda);
+  max-width: 100%;
+  max-height: 100%;
+  box-shadow: 0 12px 34px rgba(0, 0, 0, 0.28);
+  transition: box-shadow 0.3s, border-color 0.3s;
+}
+
+#canvas-labels {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  border-radius: var(--raio-borda);
+}
+
+#canvas-jogo.canvas-vitoria {
+  border-color: var(--cor-sucesso);
+  box-shadow: 0 0 12px var(--cor-sucesso), 0 0 42px rgba(74, 222, 128, 0.45);
+}
+
+#canvas-jogo.canvas-erro {
+  border-color: var(--cor-erro);
+  box-shadow: 0 0 12px var(--cor-erro), 0 0 38px rgba(248, 113, 113, 0.42);
+  animation: shake 0.4s ease;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-6px); }
+  40% { transform: translateX(6px); }
+  60% { transform: translateX(-4px); }
+  80% { transform: translateX(4px); }
+}
+
+/* ── Painéis inferiores ───────────────────────────────────────────────────── */
+
+.paineis-inferiores {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  height: var(--altura-painel-inferior);
+  border-top: 1px solid var(--cor-borda);
+  flex-shrink: 0;
+}
+
+.painel-construtor,
+.painel-sequencia {
+  background: linear-gradient(180deg, #121622 0%, var(--cor-fundo-painel) 100%);
+  padding: 10px var(--espacamento);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.painel-construtor {
+  border-right: 1px solid var(--cor-borda);
+}
+
+/* ── Construtor: layout em duas colunas — matriz + calculadora ────────────── */
+
+.construtor-corpo {
+  display: flex;
+  gap: 12px;
+  flex: 1;
+  min-height: 0;
+  align-items: flex-start;
+}
+
+/* Seção esquerda do construtor: só a matriz */
+.construtor-matriz-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+/* Colchetes decorativos ao redor da matriz */
+.construtor-matriz-wrap::before,
+.construtor-matriz-wrap::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 6px;
+  border: 2px solid var(--cor-texto-fraco);
+}
+
+.construtor-matriz-wrap::before {
+  left: -8px;
+  border-right: none;
+  border-radius: 3px 0 0 3px;
+}
+
+.construtor-matriz-wrap::after {
+  right: -8px;
+  border-left: none;
+  border-radius: 0 3px 3px 0;
+}
+
+.grid-matriz {
+  display: grid;
+  gap: 3px;
+}
+
+.celula-matriz {
+  width: 72px;
+  height: 34px;
+  background-color: var(--cor-fundo-painel-alt);
+  border: 1px solid var(--cor-borda);
+  border-radius: 4px;
+  color: var(--cor-texto);
+  font-family: var(--fonte-principal);
+  font-size: 12px;
+  text-align: center;
+  padding: 2px 4px;
+  transition: border-color 0.15s;
+}
+
+.celula-matriz:focus {
+  outline: none;
+  border-color: var(--cor-destaque);
+  background-color: rgba(76, 201, 240, 0.05);
+}
+
+.celula-erro {
+  border-color: var(--cor-erro) !important;
+  background-color: rgba(248, 113, 113, 0.1);
+}
+
+/* Seção direita do construtor: calculadora + botões */
+.construtor-lateral {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+  min-width: 0;
+}
+
+/* Calculadora em grade 4 colunas */
+.calculadora {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 3px;
+}
+
+.calc-btn {
+  background-color: var(--cor-fundo-painel-alt);
+  border: 1px solid var(--cor-borda);
+  color: var(--cor-destaque);
+  font-size: 12px;
+  font-family: var(--fonte-principal);
+  padding: 5px 2px;
+  border-radius: 4px;
+  text-align: center;
+  transition: background-color 0.1s, border-color 0.1s;
+}
+
+.calc-btn:hover {
+  border-color: var(--cor-destaque);
+  background-color: rgba(76, 201, 240, 0.12);
+}
+
+/* Botões de ação do construtor */
+.construtor-acoes {
+  display: flex;
+  gap: 6px;
+}
+
+.btn-acao {
+  flex: 1;
+  background-color: var(--cor-fundo-painel-alt);
+  border: 1px solid var(--cor-borda);
+  color: var(--cor-texto);
+  padding: 6px 8px;
+  font-size: 12px;
+  border-radius: var(--raio-borda);
+  font-family: var(--fonte-principal);
+  transition: border-color 0.15s, background-color 0.15s;
+  box-shadow: inset 0 1px rgba(255, 255, 255, 0.025);
+}
+
+.btn-acao:hover {
+  border-color: var(--cor-texto-fraco);
+}
+
+.btn-destaque {
+  border-color: var(--cor-destaque);
+  color: var(--cor-destaque);
+}
+
+.btn-destaque:hover {
+  background-color: var(--cor-destaque);
+  color: #000;
+  box-shadow: 0 0 16px rgba(76, 201, 240, 0.25);
+}
+
+/* ── Sequência: itens horizontais + resultado ─────────────────────────────── */
+
+/* Lista de itens na sequência — horizontal, com quebra de linha */
+.sequencia-convencao {
+  color: var(--cor-texto-fraco);
+  font-size: 9px;
+  letter-spacing: 0.35px;
+  line-height: 1.3;
+}
+
+.seletor-objetos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.seletor-objetos[hidden] {
+  display: none;
+}
+
+.objeto-chip {
+  padding: 4px 9px;
+  border: 1px solid var(--cor-borda);
+  background: var(--cor-fundo-painel-alt);
+  color: var(--cor-texto-fraco);
+  font-size: 10px;
+}
+
+.objeto-chip.ativo {
+  border-color: #ffd34d;
+  color: #ffd34d;
+  box-shadow: 0 0 10px rgba(255, 211, 77, 0.18);
+}
+
+.lista-sequencia {
+  list-style: none;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 5px;
+  flex-shrink: 0;
+  max-height: 90px;
+  overflow-y: auto;
+  align-content: flex-start;
+}
+
+.seq-item {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  background-color: var(--cor-fundo-painel-alt);
+  border: 1px solid var(--cor-borda);
+  border-radius: 4px;
+  padding: 4px 6px;
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.seq-item-nome {
+  color: var(--cor-destaque);
+  font-size: 11px;
+  font-family: var(--fonte-principal);
+  max-width: 140px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.seq-btn-mover,
+.seq-btn-remover {
+  background: transparent;
+  border: none;
+  color: var(--cor-texto-fraco);
+  font-size: 11px;
+  padding: 1px 3px;
+  line-height: 1;
+}
+
+.seq-btn-mover:hover,
+.seq-btn-remover:hover {
+  color: var(--cor-texto);
+}
+
+.seq-btn-mover:disabled {
+  opacity: 0.2;
+  cursor: default;
+}
+
+/* Resultado matricial — exibe abaixo da sequência */
+.resultado-area {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.resultado-lado {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+  min-width: 0;
+}
+
+.resultado-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--cor-texto-fraco);
+}
+
+.resultado-matriz-wrap {
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
+.resultado-matriz-wrap::before,
+.resultado-matriz-wrap::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 5px;
+  border: 1px solid var(--cor-texto-fraco);
+  opacity: 0.5;
+}
+
+.resultado-matriz-wrap::before {
+  left: -6px;
+  border-right: none;
+}
+
+.resultado-matriz-wrap::after {
+  right: -6px;
+  border-left: none;
+}
+
+.grid-resultado {
+  display: grid;
+  gap: 2px;
+}
+
+.resultado-celula {
+  font-size: 10px;
+  color: var(--cor-destaque);
+  text-align: center;
+  padding: 3px 2px;
+  background-color: var(--cor-fundo-painel-alt);
+  border-radius: 2px;
+  font-family: var(--fonte-principal);
+  min-width: 44px;
+}
+
+/* Botão verificar fica no lado direito do resultado */
+.sequencia-acoes {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: flex-end;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.btn-verificar {
+  padding: 8px 20px;
+  font-size: 13px;
+  white-space: nowrap;
+  box-shadow: 0 6px 18px rgba(230, 57, 70, 0.22);
+}
+
+/* ── Modal de parâmetros de template ─────────────────────────────────────── */
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.65);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+.modal-overlay[hidden] {
+  display: none !important;
+}
+
+.modal-box {
+  background-color: var(--cor-fundo-painel);
+  border: 1px solid var(--cor-borda);
+  border-radius: 10px;
+  padding: 20px 24px;
+  min-width: 320px;
+  max-width: 440px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.modal-titulo {
+  font-size: 16px;
+  color: var(--cor-destaque);
+  letter-spacing: 1px;
+  font-family: var(--fonte-principal);
+}
+
+.modal-parametros {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.modal-param-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--cor-texto-fraco);
+  margin-bottom: 2px;
+  display: block;
+}
+
+.modal-param-input {
+  width: 100%;
+  font-size: 14px;
+  height: 38px;
+}
+
+.modal-calc {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 4px;
+}
+
+.modal-calc-btn {
+  font-size: 13px;
+  padding: 6px 4px;
+}
+
+.modal-acoes {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  padding-top: 4px;
+}
+
+/* ── Créditos ─────────────────────────────────────────────────────────────── */
+
+.creditos-container {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacamento-grande);
+  align-items: center;
+}
+
+.creditos-container h1 {
+  font-size: 48px;
+  color: var(--cor-sucesso);
+  letter-spacing: 4px;
+}

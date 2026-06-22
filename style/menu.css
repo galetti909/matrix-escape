@@ -1,0 +1,135 @@
+/* Estilos da tela de menu e seleção de fases */
+
+/* Menu principal */
+.menu-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--espacamento-grande);
+  text-align: center;
+  max-width: 480px;
+  padding: var(--espacamento-grande);
+}
+
+.menu-titulo {
+  font-size: 48px;
+  font-weight: bold;
+  letter-spacing: 8px;
+  color: var(--cor-primaria);
+  text-shadow: 0 0 20px rgba(230, 57, 70, 0.5);
+}
+
+.menu-lore {
+  color: var(--cor-texto-fraco);
+  line-height: 1.8;
+  font-size: 13px;
+}
+
+#btn-iniciar {
+  font-size: 16px;
+  padding: 12px 32px;
+  letter-spacing: 2px;
+}
+
+/* Seleção de fases */
+#tela-selecao {
+  align-items: stretch;
+  justify-content: flex-start;
+  padding: var(--espacamento-grande);
+  overflow-y: auto;
+}
+
+.selecao-header {
+  display: flex;
+  align-items: center;
+  gap: var(--espacamento);
+  margin-bottom: var(--espacamento-grande);
+}
+
+.selecao-header h2 {
+  font-size: 18px;
+  letter-spacing: 2px;
+  color: var(--cor-texto-fraco);
+}
+
+.grade-mundos {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacamento-grande);
+  max-width: 800px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.mundo-secao {
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-borda);
+  padding: var(--espacamento);
+}
+
+.mundo-titulo {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  color: var(--cor-texto-fraco);
+  margin-bottom: var(--espacamento);
+}
+
+.mundo-fases {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 8px;
+}
+
+.fase-card {
+  background-color: var(--cor-fundo-painel);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-borda);
+  padding: 12px 8px;
+  text-align: center;
+  cursor: pointer;
+  box-shadow: 0 5px 16px rgba(0, 0, 0, 0.16);
+  transition: border-color 0.15s, background-color 0.15s, transform 0.15s, box-shadow 0.15s;
+  font-family: var(--fonte-principal);
+  color: var(--cor-texto);
+}
+
+.fase-card:hover {
+  border-color: var(--cor-primaria);
+  background-color: var(--cor-fundo-painel-alt);
+  transform: translateY(-2px);
+  box-shadow: 0 9px 24px rgba(0, 0, 0, 0.28), 0 0 14px rgba(230, 57, 70, 0.10);
+}
+
+.fase-card.bloqueada {
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+
+.fase-card.bloqueada:hover {
+  border-color: var(--cor-borda);
+  background-color: var(--cor-fundo-painel);
+}
+
+.fase-card.completa {
+  border-color: var(--cor-sucesso);
+  background: linear-gradient(180deg, rgba(74, 222, 128, 0.08), var(--cor-fundo-painel));
+}
+
+.fase-card .fase-numero {
+  font-size: 11px;
+  color: var(--cor-texto-fraco);
+  display: block;
+  margin-bottom: 4px;
+}
+
+.fase-card .fase-nome-card {
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.fase-card .fase-icone {
+  font-size: 16px;
+  display: block;
+  margin-bottom: 4px;
+}
