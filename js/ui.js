@@ -51,7 +51,7 @@ export function registrarCalculadora() {
   document.querySelectorAll('.calc-btn').forEach((btn) => {
     btn.addEventListener('click', () => {
       if (estado.celulaAtiva === null) return;
-      const val = btn.dataset.valor;
+      const val = btn.textContent;
       const input = document.querySelector(`.celula-matriz[data-idx="${estado.celulaAtiva}"]`);
       if (!input) return;
       const pos = input.selectionStart;
@@ -375,7 +375,7 @@ function abrirModalTemplate(tmpl) {
       const ativo = container.querySelector('input[data-ativo="1"]') || container.querySelector('input');
       if (!ativo) return;
       const pos = ativo.selectionStart ?? ativo.value.length;
-      const val = btn.dataset.valor;
+      const val = btn.textContent;
       ativo.value = ativo.value.slice(0, pos) + val + ativo.value.slice(ativo.selectionEnd ?? pos);
       ativo.focus();
       ativo.setSelectionRange(pos + val.length, pos + val.length);
