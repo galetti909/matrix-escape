@@ -5,6 +5,7 @@ import { estado } from './state.js';
 import { inicializarMenu } from './telas/menu.js';
 import { inicializarSelecao, renderizarGrade } from './telas/select.js';
 import { inicializarJogo, carregarFase } from './telas/jogo.js';
+import { inicializarCreditos } from './telas/creditos.js';
 import { totalFases } from './fases.js';
 
 const telas = {
@@ -26,28 +27,13 @@ export function navegarPara(nomeTela) {
 }
 
 function inicializar() {
+  // Inicializa todas as telas e registra callbacks de navegação, eliminando dependências circulares
   inicializarMenu(navegarPara);
-
-  // Passa carregarFase como callback para select.js não depender de jogo.js
-  inicializarSelecao(navegarPara, (idx) => carregarFase(idx));
-
-  // Passa renderizarGrade como callback para jogo.js não depender de select.js
-  inicializarJogo(navegarPara, () => renderizarGrade());
-
-  document.getElementById('botao-voltar-inicio').addEventListener('click', () => {
-    navegarPara('menu');
-  });
+  inicializarSelecao(navegarPara, carregarFase);
+  inicializarJogo(navegarPara, renderizarGrade);
+  inicializarCreditos(navegarPara);
 
   navegarPara('menu');
-
-  // Helper de debug: ?fase=N na URL vai direto para aquela fase
-  const params = new URLSearchParams(window.location.search);
-  const faseParam = parseInt(params.get('fase'), 10);
-  if (!isNaN(faseParam) && faseParam >= 0 && faseParam < totalFases()) {
-    for (let i = 0; i < faseParam; i++) estado.fasesCompletas.add(i);
-    carregarFase(faseParam);
-    navegarPara('jogo');
-  }
 }
 
 document.addEventListener('DOMContentLoaded', inicializar);
