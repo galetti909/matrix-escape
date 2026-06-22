@@ -298,8 +298,8 @@ const TODOS_TEMPLATES = [
 
 export function renderizarTemplates() {
   const lista = document.getElementById('lista-templates');
-  const painel = document.querySelector('.painel-direito');
-  const jogo = document.querySelector('.jogo-layout');
+  const painel = document.getElementById('painel-direito');
+  const jogo = document.getElementById('jogo-layout');
   lista.innerHTML = '';
 
   const n = estado.dimensaoMatriz;

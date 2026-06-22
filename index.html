@@ -14,9 +14,9 @@
 
   <!-- Tela de menu principal -->
   <div id="tela-menu" class="tela">
-    <div class="menu-container">
-      <h1 class="menu-titulo">MATRIX ESCAPE</h1>
-      <p class="menu-lore">
+    <div id="menu-container">
+      <h1 id="menu-titulo">MATRIX ESCAPE</h1>
+      <p id="menu-lore">
         Você foi sequestrado pelo professor e está preso dentro de um navegador.<br>
         A única saída é dominar as transformações matriciais.
       </p>
@@ -26,56 +26,56 @@
 
   <!-- Tela de seleção de fases -->
   <div id="tela-selecao" class="tela" hidden>
-    <div class="selecao-header">
+    <div id="selecao-header">
       <button id="btn-voltar-menu" class="btn-voltar">← Menu</button>
       <h2>Selecionar Fase</h2>
     </div>
-    <div id="grade-mundos" class="grade-mundos"></div>
+    <div id="grade-mundos"></div>
   </div>
 
   <!-- Tela de jogo -->
   <div id="tela-jogo" class="tela" hidden>
-    <div class="jogo-layout">
+    <div id="jogo-layout">
 
       <!-- Painel lateral esquerdo: matrizes salvas -->
-      <aside class="painel-esquerdo">
+      <aside id="painel-esquerdo">
         <h3 class="painel-titulo">Salvas</h3>
-        <ul id="lista-salvas" class="lista-salvas"></ul>
+        <ul id="lista-salvas"></ul>
       </aside>
 
       <!-- Área central: canvas + info da fase -->
-      <main class="area-central">
-        <div class="fase-info">
+      <main id="area-central">
+        <div id="fase-info">
           <button id="btn-voltar-selecao" class="btn-voltar">← Fases</button>
-          <span id="fase-nome" class="fase-nome"></span>
+          <span id="fase-nome"></span>
         </div>
-        <div class="canvas-wrapper">
+        <div id="canvas-wrapper">
           <canvas id="canvas-jogo" width="600" height="500"></canvas>
           <canvas id="canvas-labels" aria-hidden="true" style="display:none"></canvas>
         </div>
       </main>
 
       <!-- Painel lateral direito: templates -->
-      <aside class="painel-direito">
+      <aside id="painel-direito">
         <h3 class="painel-titulo">Templates</h3>
-        <div class="templates-abas" id="templates-abas"></div>
-        <ul id="lista-templates" class="lista-templates"></ul>
+        <div id="templates-abas"></div>
+        <ul id="lista-templates"></ul>
       </aside>
 
     </div>
 
     <!-- Painéis inferiores -->
-    <div class="paineis-inferiores">
+    <div id="paineis-inferiores">
 
       <!-- Construtor de matriz -->
-      <section class="painel-construtor">
+      <section id="painel-construtor">
         <h3 class="painel-titulo" id="titulo-construtor">Construtor</h3>
-        <div class="construtor-corpo">
-          <div class="construtor-matriz-wrap">
-            <div id="grid-matriz" class="grid-matriz"></div>
+        <div id="construtor-corpo">
+          <div id="construtor-matriz-wrap">
+            <div id="grid-matriz"></div>
           </div>
-          <div class="construtor-lateral">
-            <div class="calculadora">
+          <div id="construtor-lateral">
+            <div id="calculadora">
               <button class="calc-btn" data-valor="sin(">sin(</button>
               <button class="calc-btn" data-valor="cos(">cos(</button>
               <button class="calc-btn" data-valor="tan(">tan(</button>
@@ -85,29 +85,29 @@
               <button class="calc-btn" data-valor="π/2">π/2</button>
               <button class="calc-btn" data-valor="π/4">π/4</button>
             </div>
-            <div class="construtor-acoes">
+            <div id="construtor-acoes">
               <button id="btn-salvar-matriz" class="btn-acao">Salvar</button>
-              <button id="btn-add-sequencia" class="btn-acao btn-destaque">+ Sequência</button>
+              <button id="btn-add-sequencia" class="btn-acao">+ Sequência</button>
             </div>
           </div>
         </div>
       </section>
 
       <!-- Sequência de transformações -->
-      <section class="painel-sequencia">
+      <section id="painel-sequencia">
         <h3 class="painel-titulo" id="titulo-sequencia">Sequência</h3>
-        <div id="seletor-objetos" class="seletor-objetos" hidden></div>
-        <p class="sequencia-convencao">Primeiro item → último item · p′ = Mₙ · … · M₂ · M₁ · p</p>
-        <ul id="lista-sequencia" class="lista-sequencia"></ul>
-        <div class="resultado-area">
-          <div class="resultado-lado">
-            <span class="resultado-label">Resultado:</span>
-            <div class="resultado-matriz-wrap">
-              <div id="grid-resultado" class="grid-resultado"></div>
+        <div id="seletor-objetos" hidden></div>
+        <p id="sequencia-convencao">Primeiro item → último item · p′ = Mₙ · … · M₂ · M₁ · p</p>
+        <ul id="lista-sequencia"></ul>
+        <div id="resultado-area">
+          <div id="resultado-lado">
+            <span id="resultado-label">Resultado:</span>
+            <div id="resultado-matriz-wrap">
+              <div id="grid-resultado"></div>
             </div>
           </div>
-          <div class="sequencia-acoes">
-            <button id="btn-verificar" class="btn-primario btn-verificar">Verificar</button>
+          <div id="sequencia-acoes">
+            <button id="btn-verificar" class="btn-primario">Verificar</button>
           </div>
         </div>
       </section>
@@ -115,11 +115,11 @@
     </div>
 
     <!-- Modal para parâmetros de template -->
-    <div id="modal-template" class="modal-overlay" hidden>
-      <div class="modal-box">
-        <h3 class="modal-titulo" id="modal-tmpl-titulo"></h3>
-        <div id="modal-tmpl-params" class="modal-parametros"></div>
-        <div class="modal-calc">
+    <div id="modal-template" hidden>
+      <div id="modal-box">
+        <h3 id="modal-tmpl-titulo"></h3>
+        <div id="modal-tmpl-params"></div>
+        <div id="modal-calc">
           <button class="calc-btn modal-calc-btn" data-valor="sin(">sin(</button>
           <button class="calc-btn modal-calc-btn" data-valor="cos(">cos(</button>
           <button class="calc-btn modal-calc-btn" data-valor="√(">√(</button>
@@ -129,7 +129,7 @@
           <button class="calc-btn modal-calc-btn" data-valor="π/3">π/3</button>
           <button class="calc-btn modal-calc-btn" data-valor="π/6">π/6</button>
         </div>
-        <div class="modal-acoes">
+        <div id="modal-acoes">
           <button id="modal-btn-cancelar" class="btn-secundario">Cancelar</button>
           <button id="modal-btn-confirmar" class="btn-primario">Usar →</button>
         </div>
@@ -137,11 +137,11 @@
     </div>
 
     <!-- Barra de diálogo -->
-    <div id="barra-dialogo" class="barra-dialogo" hidden>
-      <div class="dialogo-avatar"></div>
-      <div class="dialogo-balao">
+    <div id="barra-dialogo" hidden>
+      <div id="dialogo-avatar"></div>
+      <div id="dialogo-balao">
         <p id="dialogo-texto"></p>
-        <button id="btn-fechar-dialogo" class="btn-fechar-dialogo">✕</button>
+        <button id="btn-fechar-dialogo">✕</button>
       </div>
     </div>
 
@@ -149,7 +149,7 @@
 
   <!-- Tela de créditos -->
   <div id="tela-creditos" class="tela" hidden>
-    <div class="creditos-container">
+    <div id="creditos-container">
       <h1>Você escapou!</h1>
       <p>Parabéns — você dominou as transformações matriciais.</p>
       <button id="btn-voltar-inicio" class="btn-primario">Voltar ao início</button>

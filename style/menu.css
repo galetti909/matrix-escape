@@ -1,7 +1,7 @@
 /* Estilos da tela de menu e seleção de fases */
 
 /* Menu principal */
-.menu-container {
+#menu-container {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -11,7 +11,7 @@
   padding: var(--espacamento-grande);
 }
 
-.menu-titulo {
+#menu-titulo {
   font-size: 48px;
   font-weight: bold;
   letter-spacing: 8px;
@@ -19,7 +19,7 @@
   text-shadow: 0 0 20px rgba(230, 57, 70, 0.5);
 }
 
-.menu-lore {
+#menu-lore {
   color: var(--cor-texto-fraco);
   line-height: 1.8;
   font-size: 13px;
@@ -39,20 +39,20 @@
   overflow-y: auto;
 }
 
-.selecao-header {
+#selecao-header {
   display: flex;
   align-items: center;
   gap: var(--espacamento);
   margin-bottom: var(--espacamento-grande);
 }
 
-.selecao-header h2 {
+#selecao-header h2 {
   font-size: 18px;
   letter-spacing: 2px;
   color: var(--cor-texto-fraco);
 }
 
-.grade-mundos {
+#grade-mundos {
   display: flex;
   flex-direction: column;
   gap: var(--espacamento-grande);

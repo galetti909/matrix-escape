@@ -10,7 +10,7 @@
 }
 
 /* Área superior: painéis laterais + canvas central */
-.jogo-layout {
+#jogo-layout {
   display: grid;
   grid-template-columns: var(--largura-painel-lateral) 1fr var(--largura-painel-lateral);
   flex: 1;
@@ -20,8 +20,8 @@
 
 /* ── Painéis laterais ─────────────────────────────────────────────────────── */
 
-.painel-esquerdo,
-.painel-direito {
+#painel-esquerdo,
+#painel-direito {
   background: linear-gradient(180deg, #121622 0%, var(--cor-fundo-painel) 100%);
   border-right: 1px solid var(--cor-borda);
   padding: var(--espacamento);
@@ -31,17 +31,17 @@
   gap: 6px;
 }
 
-.painel-direito {
+#painel-direito {
   border-right: none;
   border-left: 1px solid var(--cor-borda);
 }
 
-.painel-direito[hidden] {
+#painel-direito[hidden] {
   display: none !important;
 }
 
 /* Lista de matrizes salvas — grade de chips centralizados */
-.lista-salvas {
+#lista-salvas {
   list-style: none;
   display: flex;
   flex-wrap: wrap;
@@ -68,7 +68,7 @@
 }
 
 /* Templates */
-.lista-templates {
+#lista-templates {
   list-style: none;
   display: flex;
   flex-direction: column;
@@ -108,7 +108,7 @@
 
 /* ── Área central ─────────────────────────────────────────────────────────── */
 
-.area-central {
+#area-central {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -120,20 +120,20 @@
   position: relative;
 }
 
-.fase-info {
+#fase-info {
   display: flex;
   align-items: center;
   gap: var(--espacamento);
   width: 100%;
 }
 
-.fase-nome {
+#fase-nome {
   font-size: 13px;
   color: var(--cor-texto-fraco);
   letter-spacing: 1px;
 }
 
-.canvas-wrapper {
+#canvas-wrapper {
   position: relative;
   max-width: 100%;
   max-height: calc(100% - 48px);
@@ -179,7 +179,7 @@
 
 /* ── Painéis inferiores ───────────────────────────────────────────────────── */
 
-.paineis-inferiores {
+#paineis-inferiores {
   display: grid;
   grid-template-columns: 1fr 1fr;
   height: var(--altura-painel-inferior);
@@ -187,8 +187,8 @@
   flex-shrink: 0;
 }
 
-.painel-construtor,
-.painel-sequencia {
+#painel-construtor,
+#painel-sequencia {
   background: linear-gradient(180deg, #121622 0%, var(--cor-fundo-painel) 100%);
   padding: 10px var(--espacamento);
   overflow: hidden;
@@ -197,13 +197,13 @@
   gap: 6px;
 }
 
-.painel-construtor {
+#painel-construtor {
   border-right: 1px solid var(--cor-borda);
 }
 
 /* ── Construtor: layout em duas colunas — matriz + calculadora ────────────── */
 
-.construtor-corpo {
+#construtor-corpo {
   display: flex;
   gap: 12px;
   flex: 1;
@@ -212,7 +212,7 @@
 }
 
 /* Seção esquerda do construtor: só a matriz */
-.construtor-matriz-wrap {
+#construtor-matriz-wrap {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -220,8 +220,8 @@
 }
 
 /* Colchetes decorativos ao redor da matriz */
-.construtor-matriz-wrap::before,
-.construtor-matriz-wrap::after {
+#construtor-matriz-wrap::before,
+#construtor-matriz-wrap::after {
   content: '';
   position: absolute;
   top: 0;
@@ -230,19 +230,19 @@
   border: 2px solid var(--cor-texto-fraco);
 }
 
-.construtor-matriz-wrap::before {
+#construtor-matriz-wrap::before {
   left: -8px;
   border-right: none;
   border-radius: 3px 0 0 3px;
 }
 
-.construtor-matriz-wrap::after {
+#construtor-matriz-wrap::after {
   right: -8px;
   border-left: none;
   border-radius: 0 3px 3px 0;
 }
 
-.grid-matriz {
+#grid-matriz {
   display: grid;
   gap: 3px;
 }
@@ -273,7 +273,7 @@
 }
 
 /* Seção direita do construtor: calculadora + botões */
-.construtor-lateral {
+#construtor-lateral {
   display: flex;
   flex-direction: column;
   gap: 6px;
@@ -282,7 +282,7 @@
 }
 
 /* Calculadora em grade 4 colunas */
-.calculadora {
+#calculadora {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 3px;
@@ -306,7 +306,7 @@
 }
 
 /* Botões de ação do construtor */
-.construtor-acoes {
+#construtor-acoes {
   display: flex;
   gap: 6px;
 }
@@ -328,12 +328,12 @@
   border-color: var(--cor-texto-fraco);
 }
 
-.btn-destaque {
+#btn-add-sequencia {
   border-color: var(--cor-destaque);
   color: var(--cor-destaque);
 }
 
-.btn-destaque:hover {
+#btn-add-sequencia:hover {
   background-color: var(--cor-destaque);
   color: #000;
   box-shadow: 0 0 16px rgba(76, 201, 240, 0.25);
@@ -341,21 +341,20 @@
 
 /* ── Sequência: itens horizontais + resultado ─────────────────────────────── */
 
-/* Lista de itens na sequência — horizontal, com quebra de linha */
-.sequencia-convencao {
+#sequencia-convencao {
   color: var(--cor-texto-fraco);
   font-size: 9px;
   letter-spacing: 0.35px;
   line-height: 1.3;
 }
 
-.seletor-objetos {
+#seletor-objetos {
   display: flex;
   flex-wrap: wrap;
   gap: 5px;
 }
 
-.seletor-objetos[hidden] {
+#seletor-objetos[hidden] {
   display: none;
 }
 
@@ -373,7 +372,7 @@
   box-shadow: 0 0 10px rgba(255, 211, 77, 0.18);
 }
 
-.lista-sequencia {
+#lista-sequencia {
   list-style: none;
   display: flex;
   flex-direction: row;
@@ -427,7 +426,7 @@
 }
 
 /* Resultado matricial — exibe abaixo da sequência */
-.resultado-area {
+#resultado-area {
   display: flex;
   align-items: flex-start;
   gap: 12px;
@@ -436,7 +435,7 @@
   overflow: hidden;
 }
 
-.resultado-lado {
+#resultado-lado {
   display: flex;
   flex-direction: column;
   gap: 4px;
@@ -444,21 +443,21 @@
   min-width: 0;
 }
 
-.resultado-label {
+#resultado-label {
   font-size: 10px;
   text-transform: uppercase;
   letter-spacing: 1px;
   color: var(--cor-texto-fraco);
 }
 
-.resultado-matriz-wrap {
+#resultado-matriz-wrap {
   display: flex;
   align-items: center;
   position: relative;
 }
 
-.resultado-matriz-wrap::before,
-.resultado-matriz-wrap::after {
+#resultado-matriz-wrap::before,
+#resultado-matriz-wrap::after {
   content: '';
   position: absolute;
   top: 0;
@@ -468,17 +467,17 @@
   opacity: 0.5;
 }
 
-.resultado-matriz-wrap::before {
+#resultado-matriz-wrap::before {
   left: -6px;
   border-right: none;
 }
 
-.resultado-matriz-wrap::after {
+#resultado-matriz-wrap::after {
   right: -6px;
   border-left: none;
 }
 
-.grid-resultado {
+#grid-resultado {
   display: grid;
   gap: 2px;
 }
@@ -495,7 +494,7 @@
 }
 
 /* Botão verificar fica no lado direito do resultado */
-.sequencia-acoes {
+#sequencia-acoes {
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
@@ -504,7 +503,7 @@
   flex-shrink: 0;
 }
 
-.btn-verificar {
+#btn-verificar {
   padding: 8px 20px;
   font-size: 13px;
   white-space: nowrap;
@@ -513,7 +512,7 @@
 
 /* ── Modal de parâmetros de template ─────────────────────────────────────── */
 
-.modal-overlay {
+#modal-template {
   position: fixed;
   inset: 0;
   background-color: rgba(0, 0, 0, 0.65);
@@ -523,11 +522,11 @@
   z-index: 100;
 }
 
-.modal-overlay[hidden] {
+#modal-template[hidden] {
   display: none !important;
 }
 
-.modal-box {
+#modal-box {
   background-color: var(--cor-fundo-painel);
   border: 1px solid var(--cor-borda);
   border-radius: 10px;
@@ -539,14 +538,14 @@
   gap: 14px;
 }
 
-.modal-titulo {
+#modal-tmpl-titulo {
   font-size: 16px;
   color: var(--cor-destaque);
   letter-spacing: 1px;
   font-family: var(--fonte-principal);
 }
 
-.modal-parametros {
+#modal-tmpl-params {
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -567,7 +566,7 @@
   height: 38px;
 }
 
-.modal-calc {
+#modal-calc {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 4px;
@@ -578,7 +577,7 @@
   padding: 6px 4px;
 }
 
-.modal-acoes {
+#modal-acoes {
   display: flex;
   gap: 10px;
   justify-content: flex-end;
@@ -587,7 +586,7 @@
 
 /* ── Créditos ─────────────────────────────────────────────────────────────── */
 
-.creditos-container {
+#creditos-container {
   text-align: center;
   display: flex;
   flex-direction: column;
@@ -595,7 +594,7 @@
   align-items: center;
 }
 
-.creditos-container h1 {
+#creditos-container h1 {
   font-size: 48px;
   color: var(--cor-sucesso);
   letter-spacing: 4px;
