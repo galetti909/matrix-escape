@@ -9,7 +9,6 @@ let programa2D = null;
 let programaMaterial2D = null;
 let programa3D = null;
 let programaMaterial3D = null;
-let programaFundoFinal = null;
 let programaGrid = null;
 let programaTracejado = null;
 let programaTracejado3D = null;
@@ -17,10 +16,8 @@ let bufferVertices = null;
 let bufferGrid = null;
 let bufferEixos2D = null;
 let bufferEixos3D = null;
-let bufferTelaCheia = null;
 let texturaObjeto = null;
 let texturaAlvo = null;
-let texturaTituloFinal = null;
 let cacheGeometria2D = new WeakMap();
 let cacheGeometria3D = new WeakMap();
 let verticesGridCount = 0;
@@ -154,8 +151,8 @@ const VERT_MATERIAL_3D = `
   }
 `;
 
-// CG: fragment shader Phong simples: ambiente + difusa + especular.
-// Uniforms também controlam textura, seleção, alvo e feedback emissivo.
+// CG: fragment shader Phong: ambiente + difusa + especular.
+// Uniforms controlam textura, seleção, alvo e feedback emissivo.
 const FRAG_MATERIAL_3D = `
   precision mediump float;
   uniform sampler2D u_texture;
@@ -171,16 +168,11 @@ const FRAG_MATERIAL_3D = `
   uniform float u_glowAmount;
   uniform float u_selectedObject;
   uniform float u_targetMode;
-  uniform float u_materialMode;
-  uniform vec3 u_energyColor;
   varying vec3 v_worldPos;
   varying vec3 v_normal;
   varying vec2 v_uv;
   void main() {
-    // CG: o texto permanece fixo nas UVs. A animação acontece na luz e nas
-    // scanlines, preservando a legibilidade de “COMPUTAÇÃO GRÁFICA”.
-    vec2 uvAnimada = v_uv;
-    vec4 texel = texture2D(u_texture, uvAnimada);
+    vec4 texel = texture2D(u_texture, v_uv);
     vec3 base = mix(u_cor.rgb * (0.70 + texel.r * 0.30), texel.rgb, 0.18);
     vec3 N = normalize(v_normal);
     vec3 L = normalize(-u_lightDir);
@@ -190,19 +182,6 @@ const FRAG_MATERIAL_3D = `
     float specular = pow(max(dot(V, R), 0.0), u_shininess);
     vec3 lit = base * (u_ambientStrength + u_diffuseStrength * diffuse)
              + vec3(u_specularStrength * specular);
-
-    // CG: material da placa final. A própria textura fornece texto, circuitos e
-    // moldura; Phong e Fresnel acrescentam volume sem apagar esses detalhes.
-    if (u_materialMode > 0.5) {
-      float energyRim = pow(1.0 - max(dot(N, V), 0.0), 2.6);
-      float bands = 0.5 + 0.5 * sin(v_uv.y * 44.0 - u_time * 3.2);
-      float corePulse = 0.72 + 0.28 * sin(u_time * 2.4);
-      float brilhoTextura = max(texel.r, max(texel.g, texel.b));
-      lit = texel.rgb * (u_ambientStrength + u_diffuseStrength * diffuse)
-          + vec3(0.72, 0.90, 1.0) * u_specularStrength * specular;
-      lit += u_energyColor * (energyRim * 0.88 + bands * 0.09)
-          + texel.rgb * brilhoTextura * corePulse * 0.20;
-    }
 
     // CG: rim light destaca o objeto selecionado sem mudar a malha usada na vitória.
     float rim = pow(1.0 - max(dot(N, V), 0.0), 2.2) * u_selectedObject;
@@ -215,67 +194,10 @@ const FRAG_MATERIAL_3D = `
     lit += feedbackColor * u_glowAmount * pulse;
 
     float outputAlpha = u_cor.a * texel.a;
-    // CG: alvo holográfico combina scanlines, Fresnel e transparência animada.
     if (u_targetMode > 0.5) {
-      if (u_materialMode > 0.5) {
-        float holoRim = pow(1.0 - max(dot(N, V), 0.0), 1.8);
-        float scan = 0.5 + 0.5 * sin(v_worldPos.y * 38.0 - u_time * 5.0);
-        lit = u_energyColor * (0.42 + holoRim * 1.15 + scan * 0.32)
-            + texel.rgb * 0.18;
-        outputAlpha = u_cor.a * texel.a * (0.48 + scan * 0.42);
-      } else {
-        lit = mix(u_cor.rgb, texel.rgb, 0.72) + vec3(0.12, 0.16, 0.22);
-      }
+      lit = mix(u_cor.rgb, texel.rgb, 0.72) + vec3(0.12, 0.16, 0.22);
     }
     gl_FragColor = vec4(lit, outputAlpha);
-  }
-`;
-
-// CG: quad de tela cheia usado apenas no cenário da fase final.
-const VERT_FUNDO_FINAL = `
-  attribute vec2 a_posicao;
-  varying vec2 v_uv;
-  void main() {
-    v_uv = a_posicao * 0.5 + 0.5;
-    gl_Position = vec4(a_posicao, 1.0, 1.0);
-  }
-`;
-
-// CG: fundo procedural sem imagens externas. Gradiente, estrelas, vinheta e
-// halo do portal são calculados por fragmento e animados com um único uniform.
-const FRAG_FUNDO_FINAL = `
-  precision mediump float;
-  uniform vec2 u_resolution;
-  uniform float u_time;
-  varying vec2 v_uv;
-
-  float hash(vec2 p) {
-    return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453);
-  }
-
-  void main() {
-    vec2 uv = v_uv;
-    vec2 p = uv - 0.5;
-    p.x *= u_resolution.x / max(u_resolution.y, 1.0);
-    vec3 topo = vec3(0.035, 0.018, 0.13);
-    vec3 base = vec3(0.004, 0.010, 0.045);
-    vec3 cor = mix(base, topo, uv.y);
-
-    vec2 celula = floor(gl_FragCoord.xy / 5.0);
-    float ruido = hash(celula);
-    vec2 pontoNaCelula = fract(gl_FragCoord.xy / 5.0) - 0.5;
-    float ponto = 1.0 - smoothstep(0.08, 0.34, length(pontoNaCelula));
-    float estrela = step(0.985, ruido) * ponto;
-    float cintilar = 0.55 + 0.45 * sin(u_time * (1.2 + ruido * 2.0) + ruido * 20.0);
-    cor += estrela * cintilar * vec3(0.45, 0.78, 1.0);
-
-    vec2 centroPortal = vec2(0.30, 0.20);
-    float halo = exp(-5.5 * dot(p - centroPortal, p - centroPortal));
-    cor += halo * vec3(0.10, 0.36, 0.72) * (0.65 + 0.15 * sin(u_time * 1.8));
-
-    float vinheta = 1.0 - smoothstep(0.18, 1.0, length(p));
-    cor *= 0.52 + 0.48 * vinheta;
-    gl_FragColor = vec4(cor, 1.0);
   }
 `;
 
@@ -292,7 +214,6 @@ export function inicializarWebGL(canvas) {
   programaMaterial2D = criarPrograma(VERT_MATERIAL_2D, FRAG_MATERIAL_2D);
   programa3D = criarPrograma(VERT_3D, FRAG_SOLIDO);
   programaMaterial3D = criarPrograma(VERT_MATERIAL_3D, FRAG_MATERIAL_3D);
-  programaFundoFinal = criarPrograma(VERT_FUNDO_FINAL, FRAG_FUNDO_FINAL);
   programaGrid = criarPrograma(VERT_GRID, FRAG_GRADE);
   programaTracejado = criarPrograma(VERT_2D, FRAG_TRACEJADO);
   programaTracejado3D = criarPrograma(VERT_3D, FRAG_TRACEJADO);
@@ -301,7 +222,6 @@ export function inicializarWebGL(canvas) {
   bufferGrid = gl.createBuffer();
   bufferEixos2D = gl.createBuffer();
   bufferEixos3D = gl.createBuffer();
-  bufferTelaCheia = gl.createBuffer();
   cacheGeometria2D = new WeakMap();
   cacheGeometria3D = new WeakMap();
 
@@ -309,10 +229,6 @@ export function inicializarWebGL(canvas) {
   // em todas as fases; não há download nem custo de geração dentro do frame.
   texturaObjeto = createObjectTexture(64);
   texturaAlvo = createStripeTexture(64);
-  texturaTituloFinal = createFinalTitleTexture(512, 256);
-
-  gl.bindBuffer(gl.ARRAY_BUFFER, bufferTelaCheia);
-  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 1,-1, -1,1, 1,1]), gl.STATIC_DRAW);
 
   // Grid 2D: pré-gera e envia os vértices para a GPU uma única vez
   const vertGrid = gerarVerticesGrid(0.2, 2.0);
@@ -394,7 +310,7 @@ function criarTexturaGL(canvas) {
 
 // CG: textura procedural do alvo. As diagonais tornam rotação e cisalhamento
 // imediatamente perceptíveis e a transparência mantém o objeto visível por baixo.
-export function createStripeTexture(size = 64) {
+function createStripeTexture(size = 64) {
   const canvas = document.createElement('canvas');
   canvas.width = canvas.height = size;
   const ctx = canvas.getContext('2d');
@@ -414,7 +330,7 @@ export function createStripeTexture(size = 64) {
 
 // CG: textura procedural de orientação. A grade evidencia escala/cisalhamento e
 // a seta evidencia a direção da superfície após uma rotação.
-export function createObjectTexture(size = 64) {
+function createObjectTexture(size = 64) {
   const canvas = document.createElement('canvas');
   canvas.width = canvas.height = size;
   const ctx = canvas.getContext('2d');
@@ -427,90 +343,6 @@ export function createObjectTexture(size = 64) {
     ctx.beginPath(); ctx.moveTo(p, 0); ctx.lineTo(p, size); ctx.stroke();
     ctx.beginPath(); ctx.moveTo(0, p); ctx.lineTo(size, p); ctx.stroke();
   }
-  ctx.strokeStyle = 'rgba(15,40,65,0.9)';
-  ctx.fillStyle = 'rgba(15,40,65,0.9)';
-  ctx.lineWidth = Math.max(2, size / 24);
-  ctx.beginPath();
-  ctx.moveTo(size * 0.22, size * 0.70);
-  ctx.lineTo(size * 0.72, size * 0.28);
-  ctx.stroke();
-  ctx.beginPath();
-  ctx.moveTo(size * 0.72, size * 0.28);
-  ctx.lineTo(size * 0.58, size * 0.30);
-  ctx.lineTo(size * 0.70, size * 0.44);
-  ctx.closePath();
-  ctx.fill();
-  return criarTexturaGL(canvas);
-}
-
-// CG: textura procedural da placa final. O texto é rasterizado uma única vez no
-// canvas e enviado à GPU; durante os frames, o shader apenas amostra a textura.
-export function createFinalTitleTexture(largura = 512, altura = 256) {
-  const canvas = document.createElement('canvas');
-  canvas.width = largura;
-  canvas.height = altura;
-  const ctx = canvas.getContext('2d');
-  const gradiente = ctx.createLinearGradient(0, altura, largura, 0);
-  gradiente.addColorStop(0, '#07143f');
-  gradiente.addColorStop(0.5, '#122d82');
-  gradiente.addColorStop(1, '#4f187d');
-  ctx.fillStyle = gradiente;
-  ctx.fillRect(0, 0, largura, altura);
-
-  // Moldura luminosa em duas camadas para permanecer legível sob iluminação.
-  ctx.shadowColor = '#52e8ff';
-  ctx.shadowBlur = 18;
-  ctx.strokeStyle = 'rgba(100, 235, 255, 0.95)';
-  ctx.lineWidth = 6;
-  ctx.strokeRect(13, 13, largura - 26, altura - 26);
-  ctx.shadowBlur = 0;
-  ctx.strokeStyle = 'rgba(188, 112, 255, 0.70)';
-  ctx.lineWidth = 2;
-  ctx.strokeRect(25, 25, largura - 50, altura - 50);
-
-  ctx.strokeStyle = 'rgba(94, 232, 255, 0.78)';
-  ctx.lineWidth = 2;
-  const passo = 42;
-  for (let i = 1; i < 12; i++) {
-    const p = i * passo;
-    ctx.beginPath();
-    if (i % 2 === 0) {
-      ctx.moveTo(28, p); ctx.lineTo(72, p);
-      ctx.lineTo(88, p - 12); ctx.lineTo(118, p - 12);
-    } else {
-      const x = largura - 28;
-      ctx.moveTo(x, p); ctx.lineTo(x - 44, p);
-      ctx.lineTo(x - 60, p + 12); ctx.lineTo(x - 90, p + 12);
-    }
-    ctx.stroke();
-  }
-
-  // Nós luminosos reforçam o padrão tecnológico sem depender de arquivos externos.
-  ctx.fillStyle = 'rgba(225, 252, 255, 0.95)';
-  for (const [x, y] of [[54,54],[92,96],[55,202],[largura-54,54],[largura-92,160],[largura-55,202]]) {
-    ctx.beginPath(); ctx.arc(x, y, 4, 0, Math.PI * 2); ctx.fill();
-  }
-
-  // CG: o texto faz parte da textura (sampler2D), não da geometria da placa.
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.fillStyle = '#effdff';
-  ctx.shadowColor = '#43dfff';
-  ctx.shadowBlur = 16;
-  ctx.font = 'bold 54px "Courier New", monospace';
-  ctx.fillText('COMPUTAÇÃO', largura / 2, altura / 2 - 34);
-  ctx.fillStyle = '#cabaff';
-  ctx.shadowColor = '#9a5cff';
-  ctx.font = 'bold 48px "Courier New", monospace';
-  ctx.fillText('GRÁFICA', largura / 2, altura / 2 + 38);
-  ctx.shadowBlur = 0;
-
-  // Marca UV discreta: seta para +U no rodapé.
-  ctx.strokeStyle = 'rgba(112, 236, 255, 0.75)';
-  ctx.fillStyle = 'rgba(112, 236, 255, 0.75)';
-  ctx.lineWidth = 3;
-  ctx.beginPath(); ctx.moveTo(205, 222); ctx.lineTo(307, 222); ctx.stroke();
-  ctx.beginPath(); ctx.moveTo(307, 222); ctx.lineTo(294, 215); ctx.lineTo(294, 229); ctx.closePath(); ctx.fill();
   return criarTexturaGL(canvas);
 }
 
@@ -531,14 +363,10 @@ function compilarShader(tipo, src) {
 export function iniciarLoop(canvas) {
   function frame(agora) {
     const feedbackAtivo = updateFeedbackState(agora);
-    // CG: somente fases que declaram visual.animada redesenham continuamente.
-    // Fora da tela de jogo, a animação pausa para não gastar GPU em segundo plano.
-    const telaJogo = canvas.closest('#tela-jogo');
-    const faseAnimada = estado.dadosFase?.visual?.animada === true && !telaJogo?.hidden;
-    if (estado.precisaRenderizar || faseAnimada) {
+    if (estado.precisaRenderizar) {
       renderizar(canvas, agora);
       // Durante um pulso, o próximo frame também precisa atualizar os uniforms.
-      estado.precisaRenderizar = feedbackAtivo || faseAnimada;
+      estado.precisaRenderizar = feedbackAtivo;
     }
     animId = requestAnimationFrame(frame);
   }
@@ -589,12 +417,8 @@ function renderizar(canvas, agora = performance.now()) {
   gl.viewport(0, 0, canvas.width, canvas.height);
 
   if (estado.modo3D) {
-    const fundo = estado.dadosFase?.visual?.background || [0.025, 0.035, 0.075, 1];
-    gl.clearColor(fundo[0], fundo[1], fundo[2], fundo[3]);
+    gl.clearColor(0.025, 0.035, 0.075, 1);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-    if (estado.dadosFase?.visual?.preset === 'final-title') {
-      renderizarFundoFinal(canvas, agora);
-    }
     renderizar3D(agora);
   } else {
     gl.clearColor(0.965, 0.973, 0.992, 1);
@@ -602,19 +426,6 @@ function renderizar(canvas, agora = performance.now()) {
     renderizarGrid();
     renderizar2D(agora);
   }
-}
-
-function renderizarFundoFinal(canvas, agora) {
-  if (!programaFundoFinal || !bufferTelaCheia) return;
-  gl.disable(gl.DEPTH_TEST);
-  gl.useProgram(programaFundoFinal);
-  const locPos = gl.getAttribLocation(programaFundoFinal, 'a_posicao');
-  gl.bindBuffer(gl.ARRAY_BUFFER, bufferTelaCheia);
-  gl.enableVertexAttribArray(locPos);
-  gl.vertexAttribPointer(locPos, 2, gl.FLOAT, false, 0, 0);
-  gl.uniform2f(gl.getUniformLocation(programaFundoFinal, 'u_resolution'), canvas.width, canvas.height);
-  gl.uniform1f(gl.getUniformLocation(programaFundoFinal, 'u_time'), agora / 1000);
-  gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
 }
 
 // Desenha o grid de linhas pontilhadas no fundo do canvas 2D
@@ -749,44 +560,6 @@ function desenharOutlineSelecao2D(vertices, matrizTransform, n) {
   gl.drawArrays(gl.LINE_LOOP, 0, outlineVerts.length / 2);
 }
 
-function desenharGeometria2D(prog, vertices, cor, alfa, matrizTransform, n, _ignorado, destaque = false) {
-  const locPos = gl.getAttribLocation(prog, 'a_posicao');
-  const locTransform = gl.getUniformLocation(prog, 'u_transform');
-  const locCor = gl.getUniformLocation(prog, 'u_cor');
-  const locPan = gl.getUniformLocation(prog, 'u_pan');
-
-  const matrizShader = expandir2x2Para3x3(matrizTransform, n);
-
-  const dados = new Float32Array(vertices);
-  gl.bindBuffer(gl.ARRAY_BUFFER, bufferVertices);
-  gl.bufferData(gl.ARRAY_BUFFER, dados, gl.DYNAMIC_DRAW);
-
-  gl.enableVertexAttribArray(locPos);
-  gl.vertexAttribPointer(locPos, 2, gl.FLOAT, false, 0, 0);
-
-  gl.uniformMatrix3fv(locTransform, false, matrizShader);
-  gl.uniform2f(locPan, estado.panX, estado.panY);
-
-  const [r, g, b] = cor;
-  gl.uniform4f(locCor, r, g, b, alfa);
-
-  gl.drawArrays(gl.TRIANGLES, 0, dados.length / 2);
-
-  // Outline amarelo no objeto selecionado (objeto do jogador apenas)
-  if (destaque) {
-    const outlineVerts = gerarOutline(vertices);
-    gl.bindBuffer(gl.ARRAY_BUFFER, bufferVertices);
-    gl.bufferData(gl.ARRAY_BUFFER, outlineVerts, gl.DYNAMIC_DRAW);
-    gl.vertexAttribPointer(locPos, 2, gl.FLOAT, false, 0, 0);
-    gl.uniformMatrix3fv(locTransform, false, matrizShader);
-    gl.uniform2f(locPan, estado.panX, estado.panY);
-    gl.uniform4f(locCor, 1, 0.85, 0, 1);
-    gl.lineWidth(2);
-    gl.drawArrays(gl.LINE_LOOP, 0, outlineVerts.length / 2);
-    gl.lineWidth(1);
-  }
-}
-
 // Desenha o alvo com hachura diagonal (shader tracejado sobre os próprios triângulos do objeto)
 // Funciona corretamente tanto para quads simples quanto para formas complexas (letras)
 function desenharOutlineTracejado2D(vertices, cor, matrizAlvo, n) {
@@ -874,35 +647,24 @@ function renderizar3D(agora) {
   gl.uniformMatrix4fv(locView, false, view);
 
   const fase = estado.dadosFase;
-  const ehFinal = fase.visual?.preset === 'final-title';
 
   estado.objetos.forEach((obj, idx) => {
-    let matrizTransform = calcularMatrizAcumulada(idx);
+    const matrizTransform = calcularMatrizAcumulada(idx);
     const matrizAlvo = fase.matrizAlvoObjetos
       ? fase.matrizAlvoObjetos[idx]
       : (fase.matrizAlvo || identidade4());
 
-    if (fase.ehHierarquia && obj.pai !== undefined) {
-      const mPai = calcularMatrizAcumulada(obj.pai);
-      matrizTransform = multiplicar(mPai, matrizTransform, 4);
-    }
-
-    // Alvo translúcido
-    let matrizAlvoRender = matrizAlvo;
-    if (fase.ehHierarquia && obj.pai !== undefined) {
-      matrizAlvoRender = multiplicar(fase.matrizAlvoObjetos[obj.pai], matrizAlvo, 4);
-    }
     // CG: alvo transparente não escreve profundidade, evitando esconder o objeto.
     gl.depthMask(false);
-    desenharMaterial3D(obj.vertices3D, obj.cor, ehFinal ? 0.60 : 0.42, matrizAlvoRender, proj, view, camera.eye, true, false, feedback);
-    desenharOutline3D(programa3D, obj.vertices3D, ehFinal ? [0.20, 0.92, 1.0] : [0.75, 0.88, 1.0], ehFinal ? 0.86 : 0.55, matrizAlvoRender, false, true);
+    desenharMaterial3D(obj.vertices3D, obj.cor, 0.42, matrizAlvo, proj, view, camera.eye, true, false, feedback);
+    desenharOutline3D(programa3D, obj.vertices3D, [0.75, 0.88, 1.0], 0.55, matrizAlvo, false, true);
     gl.depthMask(true);
 
     // Objeto do jogador
     const destaque = idx === estado.objetoAtivo;
     desenharMaterial3D(obj.vertices3D, obj.cor, 1.0, matrizTransform, proj, view, camera.eye, false, destaque, feedback);
     if (destaque) {
-      desenharOutline3D(programa3D, obj.vertices3D, ehFinal ? [0.58, 0.36, 1.0] : [1, 0.85, 0], ehFinal ? 0.88 : 0.72, matrizTransform, true, false);
+      desenharOutline3D(programa3D, obj.vertices3D, [1, 0.85, 0], 0.72, matrizTransform, true, false);
     }
   });
 
@@ -976,108 +738,40 @@ function calcularMatrizNormal(m) {
 }
 
 function desenharMaterial3D(vertices, cor, alfa, matriz, proj, view, eye, ehAlvo, destaque, feedback) {
-  const prog=programaMaterial3D;
-  const visual=estado.dadosFase?.visual;
-  const ehFinal=visual?.preset==='final-title';
+  const prog = programaMaterial3D;
   gl.useProgram(prog);
-  const geo=obterGeometria3D(vertices);
-  const atributos=[
-    ['a_posicao',geo.positionBuffer,3],
-    ['a_normal',geo.normalBuffer,3],
-    ['a_uv',geo.uvBuffer,2],
+  const geo = obterGeometria3D(vertices);
+  const atributos = [
+    ['a_posicao', geo.positionBuffer, 3],
+    ['a_normal',  geo.normalBuffer,   3],
+    ['a_uv',      geo.uvBuffer,       2],
   ];
-  for (const [nome,buffer,tamanho] of atributos) {
-    const loc=gl.getAttribLocation(prog,nome);
-    gl.bindBuffer(gl.ARRAY_BUFFER,buffer);
+  for (const [nome, buffer, tamanho] of atributos) {
+    const loc = gl.getAttribLocation(prog, nome);
+    gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
     gl.enableVertexAttribArray(loc);
-    gl.vertexAttribPointer(loc,tamanho,gl.FLOAT,false,0,0);
+    gl.vertexAttribPointer(loc, tamanho, gl.FLOAT, false, 0, 0);
   }
-  gl.uniformMatrix4fv(gl.getUniformLocation(prog,'u_transform'),false,matriz);
-  gl.uniformMatrix4fv(gl.getUniformLocation(prog,'u_projecao'),false,proj);
-  gl.uniformMatrix4fv(gl.getUniformLocation(prog,'u_view'),false,view);
-  gl.uniformMatrix3fv(gl.getUniformLocation(prog,'u_normalMatrix'),false,calcularMatrizNormal(matriz));
-  gl.uniform4f(gl.getUniformLocation(prog,'u_cor'),cor[0],cor[1],cor[2],alfa);
-  // CG: a luz orbital da fase especial evidencia a resposta especular de cada face.
-  const anguloLuz=ehFinal && visual.lightOrbit ? feedback.tempo*0.62 : 0;
-  const luz=ehFinal
-    ? [Math.cos(anguloLuz)*0.72,-0.72,Math.sin(anguloLuz)*0.72]
-    : [-0.45,-0.85,-0.35];
-  gl.uniform3f(gl.getUniformLocation(prog,'u_lightDir'),luz[0],luz[1],luz[2]);
-  gl.uniform3f(gl.getUniformLocation(prog,'u_cameraPos'),eye[0],eye[1],eye[2]);
-  gl.uniform1f(gl.getUniformLocation(prog,'u_ambientStrength'),ehFinal?(ehAlvo?0.70:0.42):(ehAlvo?0.8:0.34));
-  gl.uniform1f(gl.getUniformLocation(prog,'u_diffuseStrength'),ehFinal?(ehAlvo?0.20:0.68):(ehAlvo?0.2:0.72));
-  gl.uniform1f(gl.getUniformLocation(prog,'u_specularStrength'),ehFinal?(ehAlvo?0.14:0.64):(ehAlvo?0.0:0.34));
-  gl.uniform1f(gl.getUniformLocation(prog,'u_shininess'),ehFinal?38.0:24.0);
-  gl.uniform1f(gl.getUniformLocation(prog,'u_time'),feedback.tempo);
-  gl.uniform1f(gl.getUniformLocation(prog,'u_feedbackMode'),feedback.modo);
-  gl.uniform1f(gl.getUniformLocation(prog,'u_glowAmount'),ehAlvo?0:feedback.glow*0.75);
-  gl.uniform1f(gl.getUniformLocation(prog,'u_selectedObject'),destaque?1:0);
-  gl.uniform1f(gl.getUniformLocation(prog,'u_targetMode'),ehAlvo?1:0);
-  gl.uniform1f(gl.getUniformLocation(prog,'u_materialMode'),ehFinal?1:0);
-  gl.uniform3f(gl.getUniformLocation(prog,'u_energyColor'),0.18,0.72,1.0);
+  gl.uniformMatrix4fv(gl.getUniformLocation(prog, 'u_transform'),    false, matriz);
+  gl.uniformMatrix4fv(gl.getUniformLocation(prog, 'u_projecao'),     false, proj);
+  gl.uniformMatrix4fv(gl.getUniformLocation(prog, 'u_view'),         false, view);
+  gl.uniformMatrix3fv(gl.getUniformLocation(prog, 'u_normalMatrix'), false, calcularMatrizNormal(matriz));
+  gl.uniform4f(gl.getUniformLocation(prog, 'u_cor'), cor[0], cor[1], cor[2], alfa);
+  gl.uniform3f(gl.getUniformLocation(prog, 'u_lightDir'), -0.45, -0.85, -0.35);
+  gl.uniform3f(gl.getUniformLocation(prog, 'u_cameraPos'), eye[0], eye[1], eye[2]);
+  gl.uniform1f(gl.getUniformLocation(prog, 'u_ambientStrength'),  ehAlvo ? 0.8  : 0.34);
+  gl.uniform1f(gl.getUniformLocation(prog, 'u_diffuseStrength'),  ehAlvo ? 0.2  : 0.72);
+  gl.uniform1f(gl.getUniformLocation(prog, 'u_specularStrength'), ehAlvo ? 0.0  : 0.34);
+  gl.uniform1f(gl.getUniformLocation(prog, 'u_shininess'),        24.0);
+  gl.uniform1f(gl.getUniformLocation(prog, 'u_time'),        feedback.tempo);
+  gl.uniform1f(gl.getUniformLocation(prog, 'u_feedbackMode'), feedback.modo);
+  gl.uniform1f(gl.getUniformLocation(prog, 'u_glowAmount'),   ehAlvo ? 0 : feedback.glow * 0.75);
+  gl.uniform1f(gl.getUniformLocation(prog, 'u_selectedObject'), destaque ? 1 : 0);
+  gl.uniform1f(gl.getUniformLocation(prog, 'u_targetMode'),    ehAlvo ? 1 : 0);
   gl.activeTexture(gl.TEXTURE0);
-  gl.bindTexture(gl.TEXTURE_2D,ehFinal?texturaTituloFinal:(ehAlvo?texturaAlvo:texturaObjeto));
-  gl.uniform1i(gl.getUniformLocation(prog,'u_texture'),0);
-  gl.drawArrays(gl.TRIANGLES,0,geo.count);
-}
-
-function desenharGeometria3D(prog, vertices, cor, alfa, matriz, destaque) {
-  const locPos = gl.getAttribLocation(prog, 'a_posicao');
-  const locTransform = gl.getUniformLocation(prog, 'u_transform');
-  const locCor = gl.getUniformLocation(prog, 'u_cor');
-
-  const dados = new Float32Array(vertices);
-  gl.bindBuffer(gl.ARRAY_BUFFER, bufferVertices);
-  gl.bufferData(gl.ARRAY_BUFFER, dados, gl.DYNAMIC_DRAW);
-  gl.enableVertexAttribArray(locPos);
-  gl.vertexAttribPointer(locPos, 3, gl.FLOAT, false, 0, 0);
-
-  gl.uniformMatrix4fv(locTransform, false, matriz);
-
-  const [r, g, b] = cor;
-  gl.uniform4f(locCor, r, g, b, alfa);
-  gl.drawArrays(gl.TRIANGLES, 0, dados.length / 3);
-
-  // Outline amarelo para o objeto selecionado (hull invertido)
-  if (destaque) {
-    desenharOutline3D(prog, vertices, [1, 0.85, 0], 1.0, matriz, true, false);
-  }
-}
-
-// Desenha o alvo 3D com hachura diagonal — cor passa [1,1,1] para listras brancas no fundo escuro
-function desenharTracejado3D(vertices, cor, matriz) {
-  if (!programaTracejado3D) return;
-  gl.useProgram(programaTracejado3D);
-
-  const locPos = gl.getAttribLocation(programaTracejado3D, 'a_posicao');
-  const locTransform = gl.getUniformLocation(programaTracejado3D, 'u_transform');
-  const locProj = gl.getUniformLocation(programaTracejado3D, 'u_projecao');
-  const locView = gl.getUniformLocation(programaTracejado3D, 'u_view');
-  const locCor = gl.getUniformLocation(programaTracejado3D, 'u_cor');
-
-  const canvas = gl.canvas;
-  const aspect = canvas.width / canvas.height;
-  const proj = perspectiva(Math.PI / 4, aspect, 0.1, 100);
-  const view = matrizView3D(estado.orbitTheta, estado.orbitPhi);
-
-  gl.uniformMatrix4fv(locProj, false, proj);
-  gl.uniformMatrix4fv(locView, false, view);
-  gl.uniformMatrix4fv(locTransform, false, matriz);
-
-  const dados = new Float32Array(vertices);
-  gl.bindBuffer(gl.ARRAY_BUFFER, bufferVertices);
-  gl.bufferData(gl.ARRAY_BUFFER, dados, gl.DYNAMIC_DRAW);
-  gl.enableVertexAttribArray(locPos);
-  gl.vertexAttribPointer(locPos, 3, gl.FLOAT, false, 0, 0);
-
-  const [r, g, b] = cor;
-  gl.uniform4f(locCor, r, g, b, 1.0);
-  // LEQUAL para renderizar sobre a própria fill do alvo (mesma profundidade)
-  gl.depthFunc(gl.LEQUAL);
-  gl.drawArrays(gl.TRIANGLES, 0, dados.length / 3);
-  gl.depthFunc(gl.LESS);
-
-  gl.useProgram(programa3D);
+  gl.bindTexture(gl.TEXTURE_2D, ehAlvo ? texturaAlvo : texturaObjeto);
+  gl.uniform1i(gl.getUniformLocation(prog, 'u_texture'), 0);
+  gl.drawArrays(gl.TRIANGLES, 0, geo.count);
 }
 
 // Outline 3D via técnica de hull invertido:
@@ -1113,10 +807,6 @@ function desenharOutline3D(prog, vertices, cor, alfa, matriz, ehSelecao, ehAlvo)
 
 // Câmera esférica: theta = ângulo horizontal, phi = ângulo vertical
 // O jogador controla theta/phi via drag do mouse para orbitar em torno da origem
-function matrizView3D(theta, phi) {
-  return obterCamera3D(theta, phi).view;
-}
-
 function obterCamera3D(theta, phi) {
   const dist = 3.5;
   const eye = [
@@ -1267,9 +957,6 @@ export function projetarCentroObjeto(idxObjeto, canvas = gl?.canvas) {
   if (estado.modo3D) {
     const vertices = obj.vertices3D || [];
     if (vertices.length === 0) return null;
-    if (estado.dadosFase?.ehHierarquia && obj.pai !== undefined) {
-      matriz = multiplicar(calcularMatrizAcumulada(obj.pai), matriz, 4);
-    }
     let x=0,y=0,z=0,n=0;
     for (let i=0;i<vertices.length;i+=3) {
       x+=vertices[i]; y+=vertices[i+1]; z+=vertices[i+2]; n++;

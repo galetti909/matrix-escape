@@ -71,8 +71,8 @@ export function carregarFase(idxFase) {
   estado.templatesDesbloqueados = fase.templates ? [...fase.templates] : [];
   estado.panX = 0;
   estado.panY = 0;
-  estado.orbitTheta = fase.visual?.cameraTheta ?? ORBIT_THETA_INICIAL;
-  estado.orbitPhi   = fase.visual?.cameraPhi ?? ORBIT_PHI_INICIAL;
+  estado.orbitTheta = ORBIT_THETA_INICIAL;
+  estado.orbitPhi   = ORBIT_PHI_INICIAL;
 
   // Mostra/oculta o overlay de labels dos eixos
   const labelCanvas = document.getElementById('canvas-labels');
@@ -159,22 +159,16 @@ function aoVencer() {
   setTimeout(() => canvas.classList.remove('canvas-vitoria'), 1000);
 
   // Diálogo de vitória
-  exibirDialogo(fase.isFinal
-    ? (fase.mensagemVitoria || 'Desafio final concluído. Liberdade conquistada!')
-    : 'Correto! Fase concluída. Você desbloqueou novos recursos.');
+  exibirDialogo('Correto! Fase concluída. Você desbloqueou novos recursos.');
 
   // Avança para próxima fase ou créditos após delay
   setTimeout(() => {
-    if (fase.isFinal) {
-      navegarParaFn('creditos');
+    const proximo = idxFase + 1;
+    if (proximo < totalFases()) {
+      estado.faseAtual = proximo;
+      carregarFase(proximo);
     } else {
-      const proximo = idxFase + 1;
-      if (proximo < totalFases()) {
-        estado.faseAtual = proximo;
-        carregarFase(proximo);
-      } else {
-        navegarParaFn('creditos');
-      }
+      navegarParaFn('creditos');
     }
   }, 2000);
 }
@@ -289,8 +283,8 @@ function registrarNavegacaoCanvas(canvas) {
 
   canvas.addEventListener('dblclick', () => {
     if (estado.modo3D) {
-      estado.orbitTheta = estado.dadosFase?.visual?.cameraTheta ?? ORBIT_THETA_INICIAL;
-      estado.orbitPhi   = estado.dadosFase?.visual?.cameraPhi ?? ORBIT_PHI_INICIAL;
+      estado.orbitTheta = ORBIT_THETA_INICIAL;
+      estado.orbitPhi   = ORBIT_PHI_INICIAL;
     } else {
       estado.panX = 0;
       estado.panY = 0;

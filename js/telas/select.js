@@ -7,7 +7,7 @@ const MUNDOS = [
   { nome: 'Mundo 1 — Transformações 2D', fases: [0, 1, 2, 3, 4, 5, 6] },
   { nome: 'Mundo 2 — Transformações 3D', fases: [7, 8, 9, 10, 11, 12] },
   { nome: 'Mundo 3 — Múltiplos objetos 2D', fases: [13, 14, 15] },
-  { nome: 'Mundo 4 — Múltiplos objetos 3D', fases: [16, 17, 18, 19] },
+  { nome: 'Mundo 4 — Múltiplos objetos 3D', fases: [16, 17] },
 ];
 
 // aoSelecionarFase(idx): callback injetado pelo main.js para evitar dependência circular com jogo.js

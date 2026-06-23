@@ -12,6 +12,7 @@ export function renderizarConstrutor() {
   const grid = document.getElementById('grid-matriz');
   grid.innerHTML = '';
   grid.style.gridTemplateColumns = `repeat(${n}, 1fr)`;
+  grid.style.gridTemplateRows = `repeat(${n}, 1fr)`;
 
   // Inicializa valores se vazio (identidade)
   if (estado.valoresConstrutor.length !== n * n) {
@@ -211,6 +212,7 @@ function atualizarResultado() {
   const grid = document.getElementById('grid-resultado');
   grid.innerHTML = '';
   grid.style.gridTemplateColumns = `repeat(${n}, 1fr)`;
+  grid.style.gridTemplateRows = `repeat(${n}, 1fr)`;
 
   for (let lin = 0; lin < n; lin++) {
     for (let col = 0; col < n; col++) {
