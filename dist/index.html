@@ -1,0 +1,3726 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Matrix Escape</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔢</text></svg>" />
+  
+  
+  
+  
+<style>
+/* Variáveis globais — ponto único de controle para cores e dimensões */
+:root {
+  --cor-fundo: #080a12;
+  --cor-fundo-painel: #10131d;
+  --cor-fundo-painel-alt: #171c29;
+  --cor-borda: #2b3347;
+  --cor-primaria: #e63946;
+  --cor-primaria-hover: #ff4d5a;
+  --cor-texto: #e8e8f0;
+  --cor-texto-fraco: #7a7a9a;
+  --cor-destaque: #4cc9f0;
+  --cor-sucesso: #4ade80;
+  --cor-erro: #f87171;
+  --cor-alvo: rgba(230, 57, 70, 0.3);
+
+  --fonte-principal: 'Courier New', Courier, monospace;
+  --fonte-tamanho-base: 14px;
+  --fonte-tamanho-titulo: 20px;
+
+  --raio-borda: 6px;
+  --espacamento: 12px;
+  --espacamento-grande: 24px;
+
+  --altura-painel-inferior: 280px;
+  --largura-painel-lateral: 190px;
+}
+
+/* Reset mínimo */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  height: 100%;
+  overflow: hidden;
+  background-color: var(--cor-fundo);
+  color: var(--cor-texto);
+  font-family: var(--fonte-principal);
+  font-size: var(--fonte-tamanho-base);
+}
+
+/* Controle de visibilidade das telas */
+.tela {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.tela[hidden] {
+  display: none !important;
+}
+
+/* Botões base */
+button {
+  font-family: var(--fonte-principal);
+  font-size: var(--fonte-tamanho-base);
+  cursor: pointer;
+  border: none;
+  border-radius: var(--raio-borda);
+  padding: 8px 16px;
+  transition: background-color 0.15s, transform 0.1s;
+}
+
+button:active {
+  transform: scale(0.97);
+}
+
+button:focus-visible,
+input:focus-visible {
+  outline: 2px solid rgba(76, 201, 240, 0.75);
+  outline-offset: 2px;
+}
+
+.botao-primario {
+  background-color: var(--cor-primaria);
+  color: #fff;
+  font-weight: bold;
+  letter-spacing: 1px;
+}
+
+.botao-primario:hover {
+  background-color: var(--cor-primaria-hover);
+}
+
+.botao-secundario {
+  background-color: transparent;
+  color: var(--cor-texto-fraco);
+  border: 1px solid var(--cor-borda);
+  margin-top: 8px;
+}
+
+.botao-secundario:hover {
+  color: var(--cor-texto);
+  border-color: var(--cor-texto-fraco);
+}
+
+.botao-voltar {
+  background-color: transparent;
+  color: var(--cor-texto-fraco);
+  padding: 4px 8px;
+  font-size: 12px;
+  border: 1px solid var(--cor-borda);
+}
+
+.botao-voltar:hover {
+  color: var(--cor-texto);
+}
+
+/* Títulos de painéis */
+.painel-titulo {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--cor-texto-fraco);
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--cor-borda);
+  margin-bottom: 8px;
+}
+
+/* Scrollbars discretas */
+::-webkit-scrollbar {
+  width: 4px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--cor-borda);
+  border-radius: 2px;
+}
+
+/* Estilos da tela de menu e seleção de fases */
+
+/* Menu principal */
+#menu-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--espacamento-grande);
+  text-align: center;
+  max-width: 480px;
+  padding: var(--espacamento-grande);
+}
+
+#menu-titulo {
+  font-size: 48px;
+  font-weight: bold;
+  letter-spacing: 8px;
+  color: var(--cor-primaria);
+  text-shadow: 0 0 20px rgba(230, 57, 70, 0.5);
+}
+
+#menu-lore {
+  color: var(--cor-texto-fraco);
+  line-height: 1.8;
+  font-size: 13px;
+}
+
+#botao-iniciar {
+  font-size: 16px;
+  padding: 12px 32px;
+  letter-spacing: 2px;
+}
+
+/* Seleção de fases */
+#tela-selecao {
+  align-items: stretch;
+  justify-content: flex-start;
+  padding: var(--espacamento-grande);
+  overflow-y: auto;
+}
+
+#selecao-header {
+  display: flex;
+  align-items: center;
+  gap: var(--espacamento);
+  margin-bottom: var(--espacamento-grande);
+}
+
+#selecao-header h2 {
+  font-size: 18px;
+  letter-spacing: 2px;
+  color: var(--cor-texto-fraco);
+}
+
+#grade-mundos {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacamento-grande);
+  max-width: 800px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.mundo-secao {
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-borda);
+  padding: var(--espacamento);
+}
+
+.mundo-titulo {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  color: var(--cor-texto-fraco);
+  margin-bottom: var(--espacamento);
+}
+
+.mundo-fases {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 8px;
+}
+
+.fase-card {
+  background-color: var(--cor-fundo-painel);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-borda);
+  padding: 12px 8px;
+  text-align: center;
+  cursor: pointer;
+  box-shadow: 0 5px 16px rgba(0, 0, 0, 0.16);
+  transition: border-color 0.15s, background-color 0.15s, transform 0.15s, box-shadow 0.15s;
+  font-family: var(--fonte-principal);
+  color: var(--cor-texto);
+}
+
+.fase-card:hover {
+  border-color: var(--cor-primaria);
+  background-color: var(--cor-fundo-painel-alt);
+  transform: translateY(-2px);
+  box-shadow: 0 9px 24px rgba(0, 0, 0, 0.28), 0 0 14px rgba(230, 57, 70, 0.10);
+}
+
+.fase-card.bloqueada {
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+
+.fase-card.bloqueada:hover {
+  border-color: var(--cor-borda);
+  background-color: var(--cor-fundo-painel);
+}
+
+.fase-card.completa {
+  border-color: var(--cor-sucesso);
+  background: linear-gradient(180deg, rgba(74, 222, 128, 0.08), var(--cor-fundo-painel));
+}
+
+.fase-card .fase-numero {
+  font-size: 11px;
+  color: var(--cor-texto-fraco);
+  display: block;
+  margin-bottom: 4px;
+}
+
+.fase-card .fase-nome-card {
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.fase-card .fase-icone {
+  font-size: 16px;
+  display: block;
+  margin-bottom: 4px;
+}
+
+/* Layout da tela de jogo: painéis laterais, central e inferiores */
+
+#tela-jogo {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  padding: 0;
+  overflow: hidden;
+}
+
+/* Área superior: painéis laterais + canvas central */
+#jogo-layout {
+  display: grid;
+  grid-template-columns: var(--largura-painel-lateral) 1fr var(--largura-painel-lateral);
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* ── Painéis laterais ─────────────────────────────────────────────────────── */
+
+#painel-esquerdo,
+#painel-direito {
+  background: linear-gradient(180deg, #121622 0%, var(--cor-fundo-painel) 100%);
+  border-right: 1px solid var(--cor-borda);
+  padding: var(--espacamento);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+#painel-direito {
+  border-right: none;
+  border-left: 1px solid var(--cor-borda);
+}
+
+#painel-direito[hidden] {
+  display: none !important;
+}
+
+/* Lista de matrizes salvas — grade de chips centralizados */
+#lista-salvas {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: center;
+}
+
+.salva-item {
+  background-color: var(--cor-fundo-painel-alt);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-borda);
+  padding: 6px 12px;
+  cursor: pointer;
+  font-weight: bold;
+  color: var(--cor-destaque);
+  font-size: 14px;
+  transition: border-color 0.15s, background-color 0.15s;
+  text-align: center;
+}
+
+.salva-item:hover {
+  border-color: var(--cor-destaque);
+  background-color: rgba(76, 201, 240, 0.08);
+}
+
+/* Templates */
+#lista-templates {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.template-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: var(--cor-fundo-painel-alt);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-borda);
+  padding: 7px 8px;
+  font-size: 12px;
+}
+
+.template-nome {
+  flex: 1;
+  color: var(--cor-texto);
+  font-family: var(--fonte-principal);
+}
+
+.botao-usar-template {
+  background-color: var(--cor-destaque);
+  color: #000;
+  font-size: 11px;
+  font-weight: bold;
+  padding: 3px 10px;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+
+.botao-usar-template:hover {
+  opacity: 0.85;
+}
+
+/* ── Área central ─────────────────────────────────────────────────────────── */
+
+#area-central {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--espacamento);
+  gap: var(--espacamento);
+  background-color: var(--cor-fundo);
+  min-height: 0;
+  position: relative;
+}
+
+#fase-info {
+  display: flex;
+  align-items: center;
+  gap: var(--espacamento);
+  width: 100%;
+}
+
+#fase-nome {
+  font-size: 13px;
+  color: var(--cor-texto-fraco);
+  letter-spacing: 1px;
+}
+
+#canvas-wrapper {
+  position: relative;
+  max-width: 100%;
+  max-height: calc(100% - 48px);
+  display: flex;
+}
+
+#canvas-jogo {
+  border: 1px solid #39435a;
+  border-radius: var(--raio-borda);
+  max-width: 100%;
+  max-height: 100%;
+  box-shadow: 0 12px 34px rgba(0, 0, 0, 0.28);
+  transition: box-shadow 0.3s, border-color 0.3s;
+}
+
+#canvas-labels {
+  display: none;
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  border-radius: var(--raio-borda);
+}
+
+#canvas-jogo.canvas-vitoria {
+  border-color: var(--cor-sucesso);
+  box-shadow: 0 0 12px var(--cor-sucesso), 0 0 42px rgba(74, 222, 128, 0.45);
+}
+
+#canvas-jogo.canvas-erro {
+  border-color: var(--cor-erro);
+  box-shadow: 0 0 12px var(--cor-erro), 0 0 38px rgba(248, 113, 113, 0.42);
+  animation: shake 0.4s ease;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-6px); }
+  40% { transform: translateX(6px); }
+  60% { transform: translateX(-4px); }
+  80% { transform: translateX(4px); }
+}
+
+/* ── Painéis inferiores ───────────────────────────────────────────────────── */
+
+#paineis-inferiores {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  height: var(--altura-painel-inferior);
+  border-top: 1px solid var(--cor-borda);
+  flex-shrink: 0;
+}
+
+#painel-construtor,
+#painel-sequencia {
+  background: linear-gradient(180deg, #121622 0%, var(--cor-fundo-painel) 100%);
+  padding: 10px var(--espacamento);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+#painel-construtor {
+  border-right: 1px solid var(--cor-borda);
+}
+
+/* ── Construtor: layout em duas colunas — matriz + calculadora ────────────── */
+
+#construtor-corpo {
+  display: flex;
+  gap: 12px;
+  flex: 1;
+  min-height: 0;
+  align-items: stretch;
+}
+
+/* Seção esquerda do construtor: só a matriz */
+#construtor-matriz-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  aspect-ratio: 1;
+  flex-shrink: 0;
+}
+
+/* Colchetes decorativos ao redor da matriz */
+#construtor-matriz-container::before,
+#construtor-matriz-container::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 6px;
+  border: 2px solid var(--cor-texto-fraco);
+}
+
+#construtor-matriz-container::before {
+  left: -8px;
+  border-right: none;
+  border-radius: 3px 0 0 3px;
+}
+
+#construtor-matriz-container::after {
+  right: -8px;
+  border-left: none;
+  border-radius: 0 3px 3px 0;
+}
+
+#grid-matriz {
+  display: grid;
+  gap: 3px;
+  height: 100%;
+  width: 100%;
+}
+
+.celula-matriz {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  background-color: var(--cor-fundo-painel-alt);
+  border: 1px solid var(--cor-borda);
+  border-radius: 4px;
+  color: var(--cor-texto);
+  font-family: var(--fonte-principal);
+  font-size: 12px;
+  text-align: center;
+  padding: 0 4px;
+  transition: border-color 0.15s;
+}
+
+.celula-matriz:focus {
+  outline: none;
+  border-color: var(--cor-destaque);
+  background-color: rgba(76, 201, 240, 0.05);
+}
+
+.celula-erro {
+  border-color: var(--cor-erro) !important;
+  background-color: rgba(248, 113, 113, 0.1);
+}
+
+/* Seção direita do construtor: calculadora + botões */
+#construtor-lateral {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+  min-width: 0;
+}
+
+/* Calculadora em grade 4×2 — ocupa todo o espaço disponível */
+#calculadora {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(2, 1fr);
+  gap: 3px;
+  flex: 1;
+  min-height: 0;
+}
+
+.botao-calculadora {
+  background-color: var(--cor-fundo-painel-alt);
+  border: 1px solid var(--cor-borda);
+  color: var(--cor-destaque);
+  font-size: 12px;
+  font-family: var(--fonte-principal);
+  padding: 0 2px;
+  border-radius: 4px;
+  text-align: center;
+  width: 100%;
+  height: 100%;
+  transition: background-color 0.1s, border-color 0.1s;
+}
+
+.botao-calculadora:hover {
+  border-color: var(--cor-destaque);
+  background-color: rgba(76, 201, 240, 0.12);
+}
+
+/* Botões de ação do construtor */
+#construtor-acoes {
+  display: flex;
+  gap: 6px;
+}
+
+.botao-acao {
+  flex: 1;
+  background-color: var(--cor-fundo-painel-alt);
+  border: 1px solid var(--cor-borda);
+  color: var(--cor-texto);
+  padding: 6px 8px;
+  font-size: 12px;
+  border-radius: var(--raio-borda);
+  font-family: var(--fonte-principal);
+  transition: border-color 0.15s, background-color 0.15s;
+  box-shadow: inset 0 1px rgba(255, 255, 255, 0.025);
+}
+
+.botao-acao:hover {
+  border-color: var(--cor-texto-fraco);
+}
+
+#botao-adicionar-sequencia {
+  border-color: var(--cor-destaque);
+  color: var(--cor-destaque);
+}
+
+#botao-adicionar-sequencia:hover {
+  background-color: var(--cor-destaque);
+  color: #000;
+  box-shadow: 0 0 16px rgba(76, 201, 240, 0.25);
+}
+
+/* ── Sequência: itens horizontais + resultado ─────────────────────────────── */
+
+#sequencia-convencao {
+  color: var(--cor-texto-fraco);
+  font-size: 9px;
+  letter-spacing: 0.35px;
+  line-height: 1.3;
+}
+
+#seletor-objetos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+#seletor-objetos[hidden] {
+  display: none;
+}
+
+.objeto-chip {
+  padding: 4px 9px;
+  border: 1px solid var(--cor-borda);
+  background: var(--cor-fundo-painel-alt);
+  color: var(--cor-texto-fraco);
+  font-size: 10px;
+}
+
+.objeto-chip.ativo {
+  border-color: #ffd34d;
+  color: #ffd34d;
+  box-shadow: 0 0 10px rgba(255, 211, 77, 0.18);
+}
+
+#sequencia-corpo {
+  display: flex;
+  flex-direction: row;
+  gap: 12px;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+#lista-sequencia {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  width: 155px;
+  flex-shrink: 0;
+  overflow-y: auto;
+}
+
+.sequencia-item {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  background-color: var(--cor-fundo-painel-alt);
+  border: 1px solid var(--cor-borda);
+  border-radius: 4px;
+  padding: 4px 6px;
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.sequencia-item-nome {
+  color: var(--cor-destaque);
+  font-size: 11px;
+  font-family: var(--fonte-principal);
+  max-width: 140px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sequencia-botao-mover,
+.sequencia-botao-remover {
+  background: transparent;
+  border: none;
+  color: var(--cor-texto-fraco);
+  font-size: 11px;
+  padding: 1px 3px;
+  line-height: 1;
+}
+
+.sequencia-botao-mover:hover,
+.sequencia-botao-remover:hover {
+  color: var(--cor-texto);
+}
+
+.sequencia-botao-mover:disabled {
+  opacity: 0.2;
+  cursor: default;
+}
+
+/* Resultado matricial — ocupa o restante do corpo da sequência */
+#resultado-area {
+  display: flex;
+  align-items: stretch;
+  gap: 12px;
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+  overflow: hidden;
+}
+
+#resultado-lado {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+}
+
+#resultado-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--cor-texto-fraco);
+}
+
+#resultado-matriz-container {
+  display: flex;
+  align-items: center;
+  position: relative;
+  aspect-ratio: 1;
+  flex: 1;
+  min-height: 0;
+}
+
+#resultado-matriz-container::before,
+#resultado-matriz-container::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 5px;
+  border: 1px solid var(--cor-texto-fraco);
+  opacity: 0.5;
+}
+
+#resultado-matriz-container::before {
+  left: -6px;
+  border-right: none;
+}
+
+#resultado-matriz-container::after {
+  right: -6px;
+  border-left: none;
+}
+
+#grid-resultado {
+  display: grid;
+  gap: 2px;
+  height: 100%;
+  width: 100%;
+}
+
+.resultado-celula {
+  font-size: 11px;
+  color: var(--cor-destaque);
+  text-align: center;
+  padding: 0 2px;
+  background-color: var(--cor-fundo-painel-alt);
+  border-radius: 2px;
+  font-family: var(--fonte-principal);
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Botão verificar fica no lado direito do resultado */
+#sequencia-acoes {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-end;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+#botao-verificar {
+  padding: 8px 20px;
+  font-size: 13px;
+  white-space: nowrap;
+  box-shadow: 0 6px 18px rgba(230, 57, 70, 0.22);
+}
+
+/* ── Modal de parâmetros de template ─────────────────────────────────────── */
+
+#modal-template {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.65);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+#modal-template[hidden] {
+  display: none !important;
+}
+
+#modal-box {
+  background-color: var(--cor-fundo-painel);
+  border: 1px solid var(--cor-borda);
+  border-radius: 10px;
+  padding: 20px 24px;
+  min-width: 320px;
+  max-width: 440px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+#modal-template-titulo {
+  font-size: 16px;
+  color: var(--cor-destaque);
+  letter-spacing: 1px;
+  font-family: var(--fonte-principal);
+}
+
+#modal-template-parametros {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.modal-parametro-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--cor-texto-fraco);
+  margin-bottom: 2px;
+  display: block;
+}
+
+.modal-parametro-input {
+  width: 100%;
+  font-size: 14px;
+  height: 38px;
+}
+
+#modal-calculadora {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 4px;
+}
+
+.modal-calculadora-botao {
+  font-size: 13px;
+  padding: 6px 4px;
+}
+
+#modal-acoes {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  padding-top: 4px;
+}
+
+/* ── Créditos ─────────────────────────────────────────────────────────────── */
+
+#creditos-container {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacamento-grande);
+  align-items: center;
+}
+
+#creditos-container h1 {
+  font-size: 48px;
+  color: var(--cor-sucesso);
+  letter-spacing: 4px;
+}
+
+/* Barra de diálogo inferior */
+
+#barra-dialogo {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: rgba(10, 10, 15, 0.95);
+  border-top: 1px solid var(--cor-borda);
+  display: flex;
+  align-items: center;
+  gap: var(--espacamento);
+  padding: 12px var(--espacamento-grande);
+  z-index: 100;
+  backdrop-filter: blur(4px);
+  animation: slideUp 0.25s ease;
+}
+
+#barra-dialogo[hidden] {
+  display: none;
+}
+
+@keyframes slideUp {
+  from { transform: translateY(100%); opacity: 0; }
+  to   { transform: translateY(0);   opacity: 1; }
+}
+
+/* Avatar do personagem */
+#dialogo-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background-color: var(--cor-primaria);
+  border: 2px solid var(--cor-primaria-hover);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+}
+
+#dialogo-avatar::before {
+  content: '👨‍🏫';
+}
+
+/* Balão de texto */
+#dialogo-balao {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--espacamento);
+}
+
+#dialogo-balao p {
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--cor-texto);
+  max-width: 800px;
+}
+
+#botao-fechar-dialogo {
+  background: transparent;
+  border: 1px solid var(--cor-borda);
+  color: var(--cor-texto-fraco);
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  font-size: 12px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+#botao-fechar-dialogo:hover {
+  border-color: var(--cor-texto);
+  color: var(--cor-texto);
+}
+
+</style>
+</head>
+<body>
+
+  <!-- Tela de menu principal -->
+  <div id="tela-menu" class="tela">
+    <div id="menu-container">
+      <h1 id="menu-titulo">MATRIX ESCAPE</h1>
+      <p id="menu-lore">
+        Você foi sequestrado pelo professor e está preso dentro de um navegador.<br>
+        A única saída é dominar as transformações matriciais.
+      </p>
+      <button id="botao-iniciar" class="botao-primario">Iniciar</button>
+    </div>
+  </div>
+
+  <!-- Tela de seleção de fases -->
+  <div id="tela-selecao" class="tela" hidden>
+    <div id="selecao-header">
+      <button id="botao-voltar-menu" class="botao-voltar">← Menu</button>
+      <h2>Selecionar Fase</h2>
+    </div>
+    <div id="grade-mundos"></div>
+  </div>
+
+  <!-- Tela de jogo -->
+  <div id="tela-jogo" class="tela" hidden>
+    <div id="jogo-layout">
+
+      <!-- Painel lateral esquerdo: matrizes salvas -->
+      <aside id="painel-esquerdo">
+        <h3 class="painel-titulo">Matrizes Salvas</h3>
+        <ul id="lista-salvas"></ul>
+      </aside>
+
+      <!-- Área central: canvas + info da fase -->
+      <main id="area-central">
+        <div id="fase-info">
+          <button id="botao-voltar-selecao" class="botao-voltar">← Fases</button>
+          <span id="fase-nome"></span>
+        </div>
+        <div id="canvas-wrapper">
+          <canvas id="canvas-jogo" width="600" height="500"></canvas>
+          <canvas id="canvas-labels" aria-hidden="true"></canvas>
+        </div>
+      </main>
+
+      <!-- Painel lateral direito: templates -->
+      <aside id="painel-direito">
+        <h3 class="painel-titulo">Templates</h3>
+        <ul id="lista-templates"></ul>
+      </aside>
+
+    </div>
+
+    <!-- Painéis inferiores -->
+    <div id="paineis-inferiores">
+
+      <!-- Construtor de matriz -->
+      <section id="painel-construtor">
+        <h3 class="painel-titulo" id="titulo-construtor">Construtor</h3>
+        <div id="construtor-corpo">
+          <div id="construtor-matriz-container">
+            <div id="grid-matriz"></div>
+          </div>
+          <div id="construtor-lateral">
+            <div id="calculadora">
+              <button class="botao-calculadora">sin(</button>
+              <button class="botao-calculadora">cos(</button>
+              <button class="botao-calculadora">tan(</button>
+              <button class="botao-calculadora">√(</button>
+              <button class="botao-calculadora">π</button>
+              <button class="botao-calculadora">e</button>
+              <button class="botao-calculadora">π/2</button>
+              <button class="botao-calculadora">π/4</button>
+            </div>
+            <div id="construtor-acoes">
+              <button id="botao-salvar-matriz" class="botao-acao">Salvar</button>
+              <button id="botao-adicionar-sequencia" class="botao-acao">+ Sequência</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Sequência de transformações -->
+      <section id="painel-sequencia">
+        <h3 class="painel-titulo" id="titulo-sequencia">Sequência</h3>
+        <div id="seletor-objetos" hidden></div>
+        <p id="sequencia-convencao">Primeiro item → último item · p′ = Mₙ · … · M₂ · M₁ · p</p>
+        <div id="sequencia-corpo">
+          <ul id="lista-sequencia"></ul>
+          <div id="resultado-area">
+            <div id="resultado-lado">
+              <span id="resultado-label">Resultado:</span>
+              <div id="resultado-matriz-container">
+                <div id="grid-resultado"></div>
+              </div>
+            </div>
+            <div id="sequencia-acoes">
+              <button id="botao-verificar" class="botao-primario">Verificar</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- Modal para parâmetros de template -->
+    <div id="modal-template" hidden>
+      <div id="modal-box">
+        <h3 id="modal-template-titulo"></h3>
+        <div id="modal-template-parametros"></div>
+        <div id="modal-calculadora">
+          <button class="botao-calculadora modal-calculadora-botao">sin(</button>
+          <button class="botao-calculadora modal-calculadora-botao">cos(</button>
+          <button class="botao-calculadora modal-calculadora-botao">√(</button>
+          <button class="botao-calculadora modal-calculadora-botao">π</button>
+          <button class="botao-calculadora modal-calculadora-botao">π/2</button>
+          <button class="botao-calculadora modal-calculadora-botao">π/4</button>
+          <button class="botao-calculadora modal-calculadora-botao">π/3</button>
+          <button class="botao-calculadora modal-calculadora-botao">π/6</button>
+        </div>
+        <div id="modal-acoes">
+          <button id="modal-botao-cancelar" class="botao-secundario">Cancelar</button>
+          <button id="modal-botao-confirmar" class="botao-primario">Usar →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Barra de diálogo -->
+    <div id="barra-dialogo" hidden>
+      <div id="dialogo-avatar"></div>
+      <div id="dialogo-balao">
+        <p id="dialogo-texto"></p>
+        <button id="botao-fechar-dialogo">✕</button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Tela de créditos -->
+  <div id="tela-creditos" class="tela" hidden>
+    <div id="creditos-container">
+      <h1>Você escapou!</h1>
+      <p>Parabéns — você dominou as transformações matriciais.</p>
+      <button id="botao-voltar-inicio" class="botao-primario">Voltar ao início</button>
+    </div>
+  </div>
+
+  <script>
+// ── js/matrizes.js ──
+// Operações matriciais manuais — parte central do propósito educativo do projeto
+// Todas as matrizes são Float32Array em ordem column-major para compatibilidade com WebGL
+
+// --- Utilitários básicos ---
+
+function identidade3() {
+  return new Float32Array([
+    1, 0, 0,
+    0, 1, 0,
+    0, 0, 1,
+  ]);
+}
+
+function identidade4() {
+  return new Float32Array([
+    1, 0, 0, 0,
+    0, 1, 0, 0,
+    0, 0, 1, 0,
+    0, 0, 0, 1,
+  ]);
+}
+
+// Multiplica duas matrizes NxN (ordem column-major)
+function multiplicar(A, B, n) {
+  const C = new Float32Array(n * n);
+  for (let col = 0; col < n; col++) {
+    for (let lin = 0; lin < n; lin++) {
+      let soma = 0;
+      for (let k = 0; k < n; k++) {
+        // A é column-major: A[k*n + lin], B é column-major: B[col*n + k]
+        soma += A[k * n + lin] * B[col * n + k];
+      }
+      C[col * n + lin] = soma;
+    }
+  }
+  return C;
+}
+
+// Compõe uma lista na ordem visual de aplicação.
+// Se a sequência é [A, B, C], A age primeiro e a matriz final é C × B × A.
+function multiplicarSequencia(matrizes, n) {
+  if (matrizes.length === 0) {
+    if (n === 2) return new Float32Array([1, 0, 0, 1]); // identidade 2×2
+    return n === 3 ? identidade3() : identidade4();
+  }
+  let resultado = n === 2
+    ? new Float32Array([1, 0, 0, 1])
+    : n === 3 ? identidade3() : identidade4();
+  for (const matriz of matrizes) {
+    // Pré-multiplicação: a nova transformação age depois das anteriores.
+    resultado = multiplicar(matriz, resultado, n);
+  }
+  return resultado;
+}
+
+// --- Matrizes 2D (3×3 homogêneas, column-major) ---
+
+function escala2D(sx, sy) {
+  return new Float32Array([
+    sx, 0, 0,
+    0, sy, 0,
+    0,  0, 1,
+  ]);
+}
+
+function translacao2D(tx, ty) {
+  return new Float32Array([
+    1, 0, 0,
+    0, 1, 0,
+    tx, ty, 1,
+  ]);
+}
+
+function rotacao2D(theta) {
+  const c = Math.cos(theta);
+  const s = Math.sin(theta);
+  return new Float32Array([
+    c, s, 0,
+    -s, c, 0,
+    0,  0, 1,
+  ]);
+}
+
+function cisalhamento2D(kx, ky) {
+  return new Float32Array([
+    1, ky, 0,
+    kx, 1, 0,
+    0,  0, 1,
+  ]);
+}
+
+// Matriz 2×2 pura (sem coordenadas homogêneas) — usada no mundo 1 fases 1-3
+function escala2x2(sx, sy) {
+  return new Float32Array([sx, 0, 0, sy]);
+}
+
+function cisalhamento2x2(kx, ky) {
+  return new Float32Array([1, ky, kx, 1]);
+}
+
+// --- Matrizes 3D (4×4 homogêneas, column-major) ---
+
+function escala3D(sx, sy, sz) {
+  return new Float32Array([
+    sx, 0,  0,  0,
+    0,  sy, 0,  0,
+    0,  0,  sz, 0,
+    0,  0,  0,  1,
+  ]);
+}
+
+function translacao3D(tx, ty, tz) {
+  return new Float32Array([
+    1, 0, 0, 0,
+    0, 1, 0, 0,
+    0, 0, 1, 0,
+    tx, ty, tz, 1,
+  ]);
+}
+
+function rotacaoX(theta) {
+  const c = Math.cos(theta);
+  const s = Math.sin(theta);
+  return new Float32Array([
+    1, 0,  0, 0,
+    0, c,  s, 0,
+    0, -s, c, 0,
+    0, 0,  0, 1,
+  ]);
+}
+
+function rotacaoY(theta) {
+  const c = Math.cos(theta);
+  const s = Math.sin(theta);
+  return new Float32Array([
+    c, 0, -s, 0,
+    0, 1,  0, 0,
+    s, 0,  c, 0,
+    0, 0,  0, 1,
+  ]);
+}
+
+function rotacaoZ(theta) {
+  const c = Math.cos(theta);
+  const s = Math.sin(theta);
+  return new Float32Array([
+    c,  s, 0, 0,
+    -s, c, 0, 0,
+    0,  0, 1, 0,
+    0,  0, 0, 1,
+  ]);
+}
+
+// Câmera lookAt — gera view matrix em column-major para WebGL
+function lookAt(eye, center, up) {
+  const sub = (a, b) => [a[0]-b[0], a[1]-b[1], a[2]-b[2]];
+  const norm = (v) => { const l = Math.sqrt(v[0]*v[0]+v[1]*v[1]+v[2]*v[2]); return [v[0]/l,v[1]/l,v[2]/l]; };
+  const cross = (a, b) => [a[1]*b[2]-a[2]*b[1], a[2]*b[0]-a[0]*b[2], a[0]*b[1]-a[1]*b[0]];
+  const dot = (a, b) => a[0]*b[0]+a[1]*b[1]+a[2]*b[2];
+
+  const f = norm(sub(center, eye));
+  const s = norm(cross(f, up));
+  const u = cross(s, f);
+
+  return new Float32Array([
+    s[0], u[0], -f[0], 0,
+    s[1], u[1], -f[1], 0,
+    s[2], u[2], -f[2], 0,
+    -dot(s, eye), -dot(u, eye), dot(f, eye), 1,
+  ]);
+}
+
+// Perspectiva simples para o modo 3D
+function perspectiva(fovRad, aspect, near, far) {
+  const f = 1.0 / Math.tan(fovRad / 2);
+  const rangeInv = 1 / (near - far);
+  return new Float32Array([
+    f / aspect, 0, 0, 0,
+    0, f, 0, 0,
+    0, 0, (near + far) * rangeInv, -1,
+    0, 0, near * far * rangeInv * 2, 0,
+  ]);
+}
+
+// Verifica se duas matrizes são "iguais" dentro de uma tolerância
+function matrizesSaoIguais(A, B, n, tolerancia = 1e-4) {
+  for (let i = 0; i < n * n; i++) {
+    if (Math.abs(A[i] - B[i]) > tolerancia) return false;
+  }
+  return true;
+}
+
+// Avalia uma string de expressão matemática de forma segura
+// Aceita símbolos visuais (π, sin(, cos(, √() além das formas JS
+function avaliarExpressao(str) {
+  if (str === null || str === undefined || str === '') return null;
+  try {
+    const limpa = String(str)
+      .replace(/π/g, 'Math.PI')
+      .replace(/sin\(/g, 'Math.sin(')
+      .replace(/cos\(/g, 'Math.cos(')
+      .replace(/tan\(/g, 'Math.tan(')
+      .replace(/√\(/g, 'Math.sqrt(')
+      // 'e' isolado como constante de Euler, não parte de palavras
+      .replace(/\be\b/g, 'Math.E');
+    // eslint-disable-next-line no-new-func
+    const fn = new Function('Math', `"use strict"; return (${limpa});`);
+    const resultado = fn(Math);
+    if (typeof resultado !== 'number' || !isFinite(resultado)) return null;
+    return resultado;
+  } catch {
+    return null;
+  }
+}
+
+// ── js/state.js ──
+// Estado centralizado do jogo — nenhum módulo mantém estado próprio silencioso
+
+const estado = {
+  // Fase atual (0-indexed)
+  faseAtual: 0,
+
+  // Índice do objeto selecionado no canvas (múltiplos objetos nos mundos 3 e 4)
+  objetoAtivo: 0,
+
+  // Templates desbloqueados: { id, nome, params, construir(params) }
+  templatesDesbloqueados: [],
+
+  // Matrizes salvas pelo jogador na fase atual: { rotulo, valores }
+  matrizesSalvas: [],
+
+  // Sequência de transformações do objeto ativo: { tipo, fonte, valores, params }
+  // tipo: 'salva' | 'template'
+  sequencias: [[]],
+
+  // Flag para o game loop saber que precisa redesenhar
+  precisaRenderizar: true,
+
+  // Célula do grid de matriz atualmente selecionada
+  celulaAtiva: null,
+
+  // Valores atuais no construtor de matriz (como strings, pois o usuário digita expressões)
+  valoresConstrutor: [],
+
+  // Dimensão da matriz na fase atual (2, 3 ou 4)
+  dimensaoMatriz: 3,
+
+  // Indica se a fase está em modo 3D
+  modo3D: false,
+
+  // Objetos da fase atual — cada um tem: { nome, vertices, cor, sequencia, matrizFinal }
+  // Populado por fases.js ao carregar uma fase
+  objetos: [],
+
+  // Fase sendo exibida (dados de fases.js)
+  dadosFase: null,
+
+  // Fases completadas (Set de índices)
+  fasesCompletas: new Set(),
+
+  // Pan da câmera 2D (offset em NDC aplicado após transformação)
+  panX: 0,
+  panY: 0,
+
+  // Órbita da câmera 3D (ângulos esféricos)
+  orbitTheta: Math.PI * 0.25,
+  orbitPhi: Math.PI * 0.15,
+
+  // CG: estado curto de feedback compartilhado pelos shaders 2D e 3D.
+  // O tempo fica centralizado para que a animação visual não altere a lógica das fases.
+  feedback: {
+    modo: 0, // 0 = neutro, 1 = acerto, -1 = erro
+    inicio: 0,
+    duracao: 0,
+  },
+};
+
+// Reinicia o estado da sessão de jogo sem apagar progresso persistente
+function reiniciarFase() {
+  estado.objetoAtivo = 0;
+  estado.matrizesSalvas = [];
+  estado.sequencias = estado.objetos.map(() => []);
+  estado.celulaAtiva = null;
+  estado.valoresConstrutor = [];
+  estado.feedback = { modo: 0, inicio: 0, duracao: 0 };
+  estado.precisaRenderizar = true;
+}
+
+// Garante que sequencias tenha uma entrada para cada objeto
+function sincronizarSequencias() {
+  while (estado.sequencias.length < estado.objetos.length) {
+    estado.sequencias.push([]);
+  }
+}
+
+// ── js/fases.js ──
+// Definição completa das fases do jogo
+// Cada fase: { nome, dialogo, dimensao, modo3D, objetos[], matrizAlvo, unlocks[] }
+// matrizAlvo: Float32Array que o jogador precisa reproduzir com a sequência
+
+
+
+// Vértices de um quadrado unitário centrado na origem (2 triângulos, 6 verts)
+const QUAD = [
+  -0.2, -0.2,
+   0.2, -0.2,
+   0.2,  0.2,
+  -0.2, -0.2,
+   0.2,  0.2,
+  -0.2,  0.2,
+];
+
+// Vértices de um cubo unitário (12 triângulos, 36 verts) para modo 3D
+function gerarCubo(s = 0.3) {
+  const v = [
+    // Frente
+    -s,-s, s,  s,-s, s,  s, s, s,
+    -s,-s, s,  s, s, s, -s, s, s,
+    // Trás
+    -s,-s,-s, -s, s,-s,  s, s,-s,
+    -s,-s,-s,  s, s,-s,  s,-s,-s,
+    // Topo
+    -s, s,-s, -s, s, s,  s, s, s,
+    -s, s,-s,  s, s, s,  s, s,-s,
+    // Base
+    -s,-s,-s,  s,-s,-s,  s,-s, s,
+    -s,-s,-s,  s,-s, s, -s,-s, s,
+    // Direita
+     s,-s,-s,  s, s,-s,  s, s, s,
+     s,-s,-s,  s, s, s,  s,-s, s,
+    // Esquerda
+    -s,-s,-s, -s,-s, s, -s, s, s,
+    -s,-s,-s, -s, s, s, -s, s,-s,
+  ];
+  return v;
+}
+
+// Cor vermelha padrão
+const COR_VERMELHO = [0.9, 0.2, 0.2];
+
+// --- Definição das fases ---
+
+const FASES = [
+
+  // ── MUNDO 1 — Transformações 2D ────────────────────────────────────────────
+
+  // Fase 1 — Escala uniforme (tutorial completo)
+  // Nenhum template: o jogador constrói a matriz de escala do zero
+  {
+    nome: 'Escala',
+    dialogo: 'Você está preso. Eu também. Mas existe uma saída — as matrizes. O quadrado SÓLIDO vermelho é seu objeto. O alvo TRACEJADO mostra onde ele deve ir. COMO JOGAR: clique numa célula da matriz (painel inferior esquerdo), digite o valor, use a calculadora para sin/cos/π. Depois clique "+ Sequência" e "Verificar". AGORA: a escala uniforme usa os elementos da diagonal da matriz 2×2. Quando sx = sy, o objeto cresce proporcionalmente em todos os lados.',
+    dimensao: 2,
+    modo3D: false,
+    objetos: [{ nome: 'Quadrado', vertices: QUAD, cor: COR_VERMELHO }],
+    matrizAlvo: escala2x2(2, 2),
+    templates: [],
+  },
+
+  // Fase 2 — Escala não-uniforme
+  // Jogador já construiu escala na fase 1 → template escala disponível
+  {
+    nome: 'Escala não-uniforme',
+    dialogo: 'A matriz [sx 0 / 0 sy] com sx ≠ sy estica cada eixo de forma independente. sx controla o quanto a largura (eixo X) muda; sy controla a altura (eixo Y). O alvo foi esticado horizontalmente e comprimido verticalmente — ou o contrário. Observe bem as proporções antes de preencher.',
+    dimensao: 2,
+    modo3D: false,
+    objetos: [{ nome: 'Quadrado', vertices: QUAD, cor: COR_VERMELHO }],
+    matrizAlvo: escala2x2(2.5, 0.8),
+    templates: ['escala'],
+  },
+
+  // Fase 3 — Cisalhamento
+  // Constrói cis do zero; escala disponível como apoio
+  {
+    nome: 'Cisalhamento',
+    dialogo: 'O cisalhamento "inclina" o objeto mantendo a área. Na matriz 2x2, os elementos FORA da diagonal fazem isso: o elemento na posição (linha 0, coluna 1) desloca X em função de Y, e (linha 1, coluna 0) desloca Y em função de X. Em notação matemática: x\' = x + k·y. O resultado é um paralelogramo. Encontre o fator k e a posição correta na matriz.',
+    dimensao: 2,
+    modo3D: false,
+    objetos: [{ nome: 'Quadrado', vertices: QUAD, cor: COR_VERMELHO }],
+    matrizAlvo: cisalhamento2x2(0.7, 0),
+    templates: ['escala'],
+  },
+
+  // Fase 4 — Translação (intro coordenadas homogêneas)
+  // Constrói transl do zero; escala e cis disponíveis
+  {
+    nome: 'Translação',
+    dialogo: 'Translação é diferente das transformações anteriores: ela move a ORIGEM. Isso significa que não é uma transformação linear — e não cabe numa matriz 2×2. A solução são as coordenadas homogêneas: adicionamos uma terceira coordenada, sempre igual a 1. Assim, tx e ty aparecem visualmente na terceira coluna da matriz 3×3, nas duas primeiras linhas.',
+    dimensao: 3,
+    modo3D: false,
+    objetos: [{ nome: 'Quadrado', vertices: QUAD, cor: COR_VERMELHO }],
+    matrizAlvo: translacao2D(0.4, 0.3),
+    templates: ['escala', 'cis'],
+  },
+
+  // Fase 5 — Rotação
+  // Constrói rot do zero; escala, cis e transl disponíveis
+  {
+    nome: 'Rotação',
+    dialogo: 'Rotação de ângulo θ transforma os vetores unitários dos eixos: o eixo X (1,0) vira (cos θ, sin θ) e o eixo Y (0,1) vira (-sin θ, cos θ). Esses vetores transformados formam as COLUNAS da matriz de rotação. Para θ = π/4, use os botões "cos(" e "π/4" da calculadora para escrever cos(π/4) na célula. A matriz resultante é exibida no painel de Resultado — compare com o que você esperaria matematicamente.',
+    dimensao: 3,
+    modo3D: false,
+    objetos: [{ nome: 'Quadrado', vertices: QUAD, cor: COR_VERMELHO }],
+    matrizAlvo: rotacao2D(Math.PI / 4),
+    templates: ['escala', 'cis', 'transl'],
+  },
+
+  // Fase 6 — Composição livre (2 transformações)
+  // Todos os templates 2D disponíveis
+  {
+    nome: 'Composição 2D — 2 passos',
+    dialogo: 'Multiplicação de matrizes NÃO É COMUTATIVA: trocar a ordem muda o resultado. A sequência é aplicada de cima para baixo. Primeiro rotacione o objeto; depois descubra a translação que leva essa orientação até o alvo. Apenas a ordem que coincide com a silhueta é aceita.',
+    dimensao: 3,
+    modo3D: false,
+    objetos: [{ nome: 'Quadrado', vertices: QUAD, cor: COR_VERMELHO }],
+    matrizAlvo: multiplicar(translacao2D(0.3, 0.2), rotacao2D(Math.PI / 4), 3),
+    templates: ['escala', 'cis', 'transl', 'rot'],
+  },
+
+  // Fase 7 — Composição livre (3 transformações) com cisalhamento
+  // Todos os templates 2D disponíveis
+  {
+    nome: 'Composição 2D — 3 passos',
+    dialogo: 'Cisalhamento inclina o objeto sem alterar sua área quando aplicado em um único eixo. Nesta composição, a sequência é lida de cima para baixo: cisalhamento, escala não uniforme e, por fim, translação. A matriz final é T × S × C.',
+    dimensao: 3,
+    modo3D: false,
+    objetos: [{ nome: 'Quadrado', vertices: QUAD, cor: COR_VERMELHO }],
+    matrizAlvo: multiplicar(
+      translacao2D(-0.55, 0.48),
+      multiplicar(escala2D(1.5, 0.55), cisalhamento2D(1.3, 0), 3),
+      3
+    ),
+    templates: ['escala', 'cis', 'transl', 'rot'],
+  },
+
+  // ── MUNDO 2 — Transformações 3D ────────────────────────────────────────────
+
+  // Fase 8 — Escala e translação 3D
+  // Constrói escala3d e transl3d do zero
+  {
+    nome: 'Escala e translação',
+    dialogo: 'Bem-vindo ao espaço 3D. A matriz agora é 4x4 homogênea — a extensão natural da 3x3 do mundo 2D. Os eixos X/Y/Z estão indicados em vermelho/verde/azul no canvas. A diagonal principal da 4×4 contém os fatores de escala (sx, sy, sz) nas posições 0, 5, 10. A quarta coluna (índices 12, 13, 14) contém a translação (tx, ty, tz). Aplique escala uniforme e depois translação para o cubo atingir o alvo.',
+    dimensao: 4,
+    modo3D: true,
+    objetos: [{ nome: 'Cubo', vertices: [], vertices3D: gerarCubo(), cor: COR_VERMELHO }],
+    matrizAlvo: multiplicar(translacao3D(1.1, 0.4, -0.5), escala3D(1.5, 1.5, 1.5), 4),
+    templates: [],
+  },
+
+  // Fase 9 — Rotação em X e Y
+  // Constrói rotX e rotY do zero; escala3d e transl3d disponíveis
+  {
+    nome: 'Rotação X e Y',
+    dialogo: 'Rotação em torno de X preserva X e rotaciona Y/Z; rotação em torno de Y preserva Y e rotaciona X/Z. Nesta fase, aplique primeiro a rotação em X, depois a rotação em Y e finalize com uma translação. Os eixos coloridos ajudam a identificar orientação e posição.',
+    dimensao: 4,
+    modo3D: true,
+    objetos: [{ nome: 'Cubo', vertices: [], vertices3D: gerarCubo(), cor: COR_VERMELHO }],
+    matrizAlvo: multiplicar(
+      translacao3D(0.7, 0.3, 0),
+      multiplicar(rotacaoY(Math.PI / 6), rotacaoX(Math.PI / 4), 4),
+      4
+    ),
+    templates: ['escala3d', 'transl3d'],
+  },
+
+  // Fase 10 — Rotação em Z
+  // Constrói rotZ do zero; escala3d, transl3d, rotX e rotY disponíveis
+  {
+    nome: 'Rotação em Z',
+    dialogo: 'Rotação em torno de Z é a extensão direta da rotação 2D: X e Y giram, enquanto Z permanece. Aplique primeiro a rotação em Z e depois uma translação para levar o cubo orientado até o alvo.',
+    dimensao: 4,
+    modo3D: true,
+    objetos: [{ nome: 'Cubo', vertices: [], vertices3D: gerarCubo(), cor: COR_VERMELHO }],
+    matrizAlvo: multiplicar(translacao3D(0.6, 0.5, 0), rotacaoZ(Math.PI / 3), 4),
+    templates: ['escala3d', 'transl3d', 'rotX', 'rotY'],
+  },
+
+  // Fase 11 — Composição 3D (2 transformações)
+  // Todos os templates 3D disponíveis
+  {
+    nome: 'Composição 3D — 2',
+    dialogo: 'Em 3D a não-comutatividade fica ainda mais evidente. Aplique primeiro a rotação em X e depois a translação. Trocar os itens desloca o cubo em uma direção diferente e não coincide com o alvo.',
+    dimensao: 4,
+    modo3D: true,
+    objetos: [{ nome: 'Cubo', vertices: [], vertices3D: gerarCubo(), cor: COR_VERMELHO }],
+    matrizAlvo: multiplicar(translacao3D(0.9, 0.3, 0), rotacaoX(Math.PI / 4), 4),
+    templates: ['escala3d', 'transl3d', 'rotX', 'rotY', 'rotZ'],
+  },
+
+  // Fase 12 — Composição 3D (3 transformações)
+  // Todos os templates 3D disponíveis
+  {
+    nome: 'Composição 3D — 3',
+    dialogo: 'Observe tamanho, orientação e posição. A sequência correta aplica primeiro escala não uniforme, depois rotação em Z e por último translação. Use a câmera para confirmar como a textura evidencia cada transformação.',
+    dimensao: 4,
+    modo3D: true,
+    objetos: [{ nome: 'Cubo', vertices: [], vertices3D: gerarCubo(), cor: COR_VERMELHO }],
+    matrizAlvo: multiplicar(
+      translacao3D(0.8, -0.5, 0.2),
+      multiplicar(rotacaoZ(Math.PI / 6), escala3D(1.2, 0.8, 1.0), 4),
+      4
+    ),
+    templates: ['escala3d', 'transl3d', 'rotX', 'rotY', 'rotZ'],
+  },
+
+  // Fase 13 — Composição 3D livre e desafiadora
+  // Todos os templates 3D disponíveis
+  {
+    nome: 'Composição 3D — livre',
+    dialogo: 'Sem dicas desta vez. Observe o alvo com atenção: tamanho, orientação em cada eixo, posição no espaço. Use tudo que aprendeu. Arraste o canvas com o mouse para orbitar e ver o alvo de ângulos diferentes. Pode levar tentativas — essa é a última fase antes dos múltiplos objetos.',
+    dimensao: 4,
+    modo3D: true,
+    objetos: [{ nome: 'Cubo', vertices: [], vertices3D: gerarCubo(), cor: COR_VERMELHO }],
+    matrizAlvo: multiplicar(
+      translacao3D(-0.7, 0.5, 0.9),
+      multiplicar(
+        rotacaoX(Math.PI / 3),
+        multiplicar(rotacaoY(-Math.PI / 6), escala3D(0.8, 1.2, 0.8), 4),
+        4
+      ),
+      4
+    ),
+    templates: ['escala3d', 'transl3d', 'rotX', 'rotY', 'rotZ'],
+  },
+
+  // ── MUNDO 3 — Múltiplos objetos 2D ─────────────────────────────────────────
+
+  // Fase 14 — Dois objetos, mesma sequência
+  // Todos os templates 2D disponíveis
+  {
+    nome: 'Dois objetos — igual',
+    dialogo: 'Novo conceito: múltiplos objetos com transformações independentes. Clique num objeto no canvas para selecioná-lo — o selecionado fica com borda amarela e seu nome aparece no título dos painéis. Aqui, AMBOS os objetos precisam da MESMA transformação. Monte a sequência para o Quadrado A, aplique. Depois selecione o B e monte a mesma sequência. A mesma matriz pode ser usada em instâncias diferentes.',
+    dimensao: 3,
+    modo3D: false,
+    objetos: [
+      { nome: 'Quadrado A', vertices: QUAD.map((v, i) => i % 2 === 0 ? v - 0.4 : v), cor: COR_VERMELHO },
+      { nome: 'Quadrado B', vertices: QUAD.map((v, i) => i % 2 === 0 ? v + 0.4 : v), cor: [0.2, 0.4, 0.9] },
+    ],
+    matrizAlvo: rotacao2D(Math.PI / 4),
+    matrizAlvoObjetos: null,
+    templates: ['escala', 'cis', 'transl', 'rot'],
+  },
+
+  // Fase 15 — Dois objetos, sequências diferentes
+  // Todos os templates 2D disponíveis
+  {
+    nome: 'Dois objetos — diferentes',
+    dialogo: 'Agora cada objeto precisa de uma transformação DIFERENTE. Selecione o Quadrado A (clique nele no canvas), construa sua sequência. Depois selecione o B e construa a sequência dele. Os dois estados são completamente independentes — trocar de objeto não apaga o trabalho feito no outro.',
+    dimensao: 3,
+    modo3D: false,
+    objetos: [
+      { nome: 'Quadrado A', vertices: QUAD.map((v, i) => i % 2 === 0 ? v - 0.4 : v), cor: COR_VERMELHO },
+      { nome: 'Quadrado B', vertices: QUAD.map((v, i) => i % 2 === 0 ? v + 0.4 : v), cor: [0.2, 0.4, 0.9] },
+    ],
+    matrizAlvoObjetos: [
+      translacao2D(-0.2, 0.3),
+      translacao2D(0.35, -0.2),
+    ],
+    templates: ['escala', 'cis', 'transl', 'rot'],
+  },
+
+  // Fase 16 — Encaixe Cruz
+  // Todos os templates 2D disponíveis (precisa de transl e rot)
+  {
+    nome: 'Encaixe — Cruz',
+    dialogo: 'O alvo é uma CRUZ — formada por uma barra horizontal e uma vertical. Você tem duas barras idênticas em posições diferentes. Uma vai para o eixo horizontal (só translação), a outra para o vertical (rotação 90° + translação). Qual vai para qual? Qualquer combinação que forme a cruz é válida.',
+    dimensao: 3,
+    modo3D: false,
+    objetos: [
+      { nome: 'Barra A', vertices: gerarBarra(-0.5, 0.25), cor: COR_VERMELHO },
+      { nome: 'Barra B', vertices: gerarBarra(0.4, -0.25), cor: [0.2, 0.4, 0.9] },
+    ],
+    alvoVertices: gerarCruz(),
+    combosValidos: [
+      [
+        translacao2D(0.5, -0.25),
+        multiplicar(translacao2D(-0.25, -0.4), rotacao2D(Math.PI / 2), 3),
+      ],
+      [
+        multiplicar(translacao2D(0.25, 0.5), rotacao2D(Math.PI / 2), 3),
+        translacao2D(-0.4, 0.25),
+      ],
+    ],
+    templates: ['escala', 'cis', 'transl', 'rot'],
+  },
+
+  // ── MUNDO 4 — Múltiplos objetos 3D ─────────────────────────────────────────
+
+  // Fase 17 — Dois cubos no espaço
+  // Todos os templates 3D disponíveis
+  {
+    nome: 'Dois cubos',
+    dialogo: 'De volta ao 3D, mas com dois cubos. Cada cubo tem seu próprio espaço de transformação 4×4 independente. Clique em cada cubo no canvas para selecioná-lo (borda amarela = selecionado). Posicione o Cubo A no lado esquerdo e o Cubo B no lado direito, como indicam os alvos tracejados.',
+    dimensao: 4,
+    modo3D: true,
+    objetos: [
+      { nome: 'Cubo A', vertices: [], vertices3D: gerarCubo(), cor: COR_VERMELHO },
+      { nome: 'Cubo B', vertices: [], vertices3D: gerarCubo(), cor: [0.2, 0.4, 0.9] },
+    ],
+    matrizAlvoObjetos: [
+      translacao3D(-0.65, 0, 0),
+      translacao3D(0.65, 0, 0),
+    ],
+    templates: ['escala3d', 'transl3d', 'rotX', 'rotY', 'rotZ'],
+  },
+
+  // Fase 18 — Três peças, uma estrutura
+  // Todos os templates 3D disponíveis
+  {
+    nome: 'Três peças',
+    dialogo: 'Três cubos, três posições alvo no espaço 3D. Cada peça tem cor diferente (vermelho, verde, azul) para identificação. Selecione cada peça pelo clique no canvas, monte a sequência de transformações necessária. Use o mouse para arrastar a câmera e visualizar o alvo de diferentes ângulos.',
+    dimensao: 4,
+    modo3D: true,
+    objetos: [
+      { nome: 'Peça A', vertices: [], vertices3D: gerarCubo(0.18), cor: COR_VERMELHO },
+      { nome: 'Peça B', vertices: [], vertices3D: gerarCubo(0.18), cor: [0.2, 0.8, 0.4] },
+      { nome: 'Peça C', vertices: [], vertices3D: gerarCubo(0.18), cor: [0.2, 0.4, 0.9] },
+    ],
+    matrizAlvoObjetos: [
+      translacao3D(-0.6, 0.3, 0),
+      translacao3D(0, -0.3, 0.2),
+      translacao3D(0.6, 0.3, -0.2),
+    ],
+    templates: ['escala3d', 'transl3d', 'rotX', 'rotY', 'rotZ'],
+  },
+
+];
+
+// --- Geometria da fase de encaixe-cruz ---
+
+// Retângulo horizontal 0.6×0.12 centrado em (ox, oy)
+function gerarBarra(ox, oy) {
+  const w = 0.3, h = 0.06;
+  return [
+    -w+ox, -h+oy,  w+ox, -h+oy,  w+ox, h+oy,
+    -w+ox, -h+oy,  w+ox,  h+oy, -w+ox, h+oy,
+  ];
+}
+
+// Cruz (barra horizontal + barra vertical) centrada na origem
+function gerarCruz() {
+  const horiz = gerarBarra(0, 0);
+  const h = 0.06, l = 0.3;
+  const vert = [
+    -h, -l,  h, -l,  h, l,
+    -h, -l,  h,  l, -h, l,
+  ];
+  return [...horiz, ...vert];
+}
+
+// --- API pública ---
+
+function obterFase(idx) {
+  return FASES[idx] || FASES[0];
+}
+
+function totalFases() {
+  return FASES.length;
+}
+
+// ── js/webgl.js ──
+// Contexto WebGL, shaders, buffers e game loop
+// Shaders compilados uma única vez na inicialização — nunca dentro do loop
+
+
+
+
+let gl = null;
+let programa2D = null;
+let programaMaterial2D = null;
+let programa3D = null;
+let programaMaterial3D = null;
+let programaGrid = null;
+let programaTracejado = null;
+let bufferVertices = null;
+let bufferGrid = null;
+let bufferEixos2D = null;
+let bufferEixos3D = null;
+let texturaObjeto = null;
+let texturaAlvo = null;
+let cacheGeometria2D = new WeakMap();
+let cacheGeometria3D = new WeakMap();
+let verticesGridCount = 0;
+let eixos3DSegmentos = [];  // [{offset, count, cor}]
+let animId = null;
+
+// --- Código GLSL dos shaders ---
+
+// Shader 2D: aplica transformação + pan da câmera
+const VERT_2D = `
+  attribute vec2 a_posicao;
+  uniform mat3 u_transform;
+  uniform vec2 u_pan;
+  void main() {
+    vec3 pos = u_transform * vec3(a_posicao, 1.0);
+    gl_Position = vec4(pos.xy + u_pan, 0.0, 1.0);
+  }
+`;
+
+// CG: vertex shader 2D. A UV nasce na geometria local, portanto a textura acompanha
+// escala, rotação e cisalhamento em vez de ficar presa aos pixels da tela.
+const VERT_MATERIAL_2D = `
+  attribute vec2 a_posicao;
+  attribute vec2 a_uv;
+  uniform mat3 u_transform;
+  uniform vec2 u_pan;
+  varying vec2 v_uv;
+  void main() {
+    vec3 pos = u_transform * vec3(a_posicao, 1.0);
+    v_uv = a_uv;
+    gl_Position = vec4(pos.xy + u_pan, 0.0, 1.0);
+  }
+`;
+
+// Shader de grid: sem transformação de objeto, apenas pan
+const VERT_GRID = `
+  attribute vec2 a_posicao;
+  uniform vec2 u_pan;
+  void main() {
+    gl_Position = vec4(a_posicao + u_pan, 0.0, 1.0);
+  }
+`;
+
+// Fragment de cor sólida — usado para objetos e alvo
+const FRAG_SOLIDO = `
+  precision mediump float;
+  uniform vec4 u_cor;
+  void main() {
+    gl_FragColor = u_cor;
+  }
+`;
+
+// Fragment do grid: linhas pontilhadas cinza claro
+const FRAG_GRADE = `
+  precision mediump float;
+  void main() {
+    float d = mod(gl_FragCoord.x + gl_FragCoord.y, 10.0);
+    if (d > 3.0) discard;
+    gl_FragColor = vec4(0.70, 0.74, 0.82, 0.52);
+  }
+`;
+
+// Fragment tracejado: borda diagonal alternada para o contorno do alvo
+const FRAG_TRACEJADO = `
+  precision mediump float;
+  uniform vec4 u_cor;
+  void main() {
+    float d = mod(gl_FragCoord.x - gl_FragCoord.y, 10.0);
+    if (d < 5.0) discard;
+    gl_FragColor = u_cor;
+  }
+`;
+
+// CG: fragment shader 2D. Mistura cor e textura procedural e acrescenta
+// seleção/feedback como emissão de cor, sem modificar a geometria do puzzle.
+const FRAG_MATERIAL_2D = `
+  precision mediump float;
+  uniform sampler2D u_texture;
+  uniform vec4 u_cor;
+  uniform float u_targetMode;
+  uniform float u_selectedObject;
+  uniform float u_feedbackMode;
+  uniform float u_glowAmount;
+  uniform float u_time;
+  varying vec2 v_uv;
+  void main() {
+    vec4 texel = texture2D(u_texture, v_uv);
+    vec3 material = mix(u_cor.rgb * (0.72 + texel.r * 0.28), texel.rgb, 0.22);
+    if (u_targetMode > 0.5) {
+      material = mix(u_cor.rgb, texel.rgb, 0.68);
+    }
+    vec3 selectedGlow = vec3(1.0, 0.78, 0.12) * u_selectedObject * 0.18;
+    vec3 feedbackColor = u_feedbackMode > 0.5
+      ? vec3(0.15, 1.0, 0.42)
+      : vec3(1.0, 0.12, 0.08);
+    float pulse = 0.85 + 0.15 * sin(u_time * 12.0);
+    material += selectedGlow + feedbackColor * u_glowAmount * pulse * 0.55;
+    float alpha = u_targetMode > 0.5 ? u_cor.a * texel.a : u_cor.a;
+    gl_FragColor = vec4(material, alpha);
+  }
+`;
+
+const VERT_3D = `
+  attribute vec3 a_posicao;
+  uniform mat4 u_transform;
+  uniform mat4 u_projecao;
+  uniform mat4 u_view;
+  void main() {
+    gl_Position = u_projecao * u_view * u_transform * vec4(a_posicao, 1.0);
+  }
+`;
+
+// CG: vertex shader 3D. Envia posição de mundo, normal e UV ao fragment shader.
+const VERT_MATERIAL_3D = `
+  attribute vec3 a_posicao;
+  attribute vec3 a_normal;
+  attribute vec2 a_uv;
+  uniform mat4 u_transform;
+  uniform mat4 u_projecao;
+  uniform mat4 u_view;
+  uniform mat3 u_normalMatrix;
+  varying vec3 v_worldPos;
+  varying vec3 v_normal;
+  varying vec2 v_uv;
+  void main() {
+    vec4 world = u_transform * vec4(a_posicao, 1.0);
+    v_worldPos = world.xyz;
+    v_normal = normalize(u_normalMatrix * a_normal);
+    v_uv = a_uv;
+    gl_Position = u_projecao * u_view * world;
+  }
+`;
+
+// CG: fragment shader Phong: ambiente + difusa + especular.
+// Uniforms controlam textura, seleção, alvo e feedback emissivo.
+const FRAG_MATERIAL_3D = `
+  precision mediump float;
+  uniform sampler2D u_texture;
+  uniform vec4 u_cor;
+  uniform vec3 u_lightDir;
+  uniform vec3 u_cameraPos;
+  uniform float u_ambientStrength;
+  uniform float u_diffuseStrength;
+  uniform float u_specularStrength;
+  uniform float u_shininess;
+  uniform float u_time;
+  uniform float u_feedbackMode;
+  uniform float u_glowAmount;
+  uniform float u_selectedObject;
+  uniform float u_targetMode;
+  varying vec3 v_worldPos;
+  varying vec3 v_normal;
+  varying vec2 v_uv;
+  void main() {
+    vec4 texel = texture2D(u_texture, v_uv);
+    vec3 base = mix(u_cor.rgb * (0.70 + texel.r * 0.30), texel.rgb, 0.18);
+    vec3 N = normalize(v_normal);
+    vec3 L = normalize(-u_lightDir);
+    vec3 V = normalize(u_cameraPos - v_worldPos);
+    float diffuse = max(dot(N, L), 0.0);
+    vec3 R = reflect(-L, N);
+    float specular = pow(max(dot(V, R), 0.0), u_shininess);
+    vec3 lit = base * (u_ambientStrength + u_diffuseStrength * diffuse)
+             + vec3(u_specularStrength * specular);
+
+    // CG: rim light destaca o objeto selecionado sem mudar a malha usada na vitória.
+    float rim = pow(1.0 - max(dot(N, V), 0.0), 2.2) * u_selectedObject;
+    lit += vec3(1.0, 0.72, 0.10) * rim * 0.75;
+
+    vec3 feedbackColor = u_feedbackMode > 0.5
+      ? vec3(0.12, 1.0, 0.38)
+      : vec3(1.0, 0.08, 0.05);
+    float pulse = 0.82 + 0.18 * sin(u_time * 12.0);
+    lit += feedbackColor * u_glowAmount * pulse;
+
+    float outputAlpha = u_cor.a * texel.a;
+    if (u_targetMode > 0.5) {
+      lit = mix(u_cor.rgb, texel.rgb, 0.72) + vec3(0.12, 0.16, 0.22);
+    }
+    gl_FragColor = vec4(lit, outputAlpha);
+  }
+`;
+
+// --- Inicialização ---
+
+function inicializarWebGL(canvas) {
+  gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+  if (!gl) {
+    alert('Seu navegador não suporta WebGL. O jogo requer WebGL 1.0.');
+    return false;
+  }
+
+  programa2D = criarPrograma(VERT_2D, FRAG_SOLIDO);
+  programaMaterial2D = criarPrograma(VERT_MATERIAL_2D, FRAG_MATERIAL_2D);
+  programa3D = criarPrograma(VERT_3D, FRAG_SOLIDO);
+  programaMaterial3D = criarPrograma(VERT_MATERIAL_3D, FRAG_MATERIAL_3D);
+  programaGrid = criarPrograma(VERT_GRID, FRAG_GRADE);
+  programaTracejado = criarPrograma(VERT_2D, FRAG_TRACEJADO);
+
+  bufferVertices = gl.createBuffer();
+  bufferGrid = gl.createBuffer();
+  bufferEixos2D = gl.createBuffer();
+  bufferEixos3D = gl.createBuffer();
+  cacheGeometria2D = new WeakMap();
+  cacheGeometria3D = new WeakMap();
+
+  // CG: texturas procedurais são criadas apenas na inicialização e reutilizadas
+  // em todas as fases; não há download nem custo de geração dentro do frame.
+  texturaObjeto = createObjectTexture(64);
+  texturaAlvo = createStripeTexture(64);
+
+  // Grid 2D: pré-gera e envia os vértices para a GPU uma única vez
+  const vertGrid = gerarVerticesGrid(0.2, 2.0);
+  verticesGridCount = vertGrid.length / 2;
+  gl.bindBuffer(gl.ARRAY_BUFFER, bufferGrid);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertGrid), gl.STATIC_DRAW);
+
+  // CG: eixos principais 2D ficam em buffer próprio e acompanham o pan da câmera.
+  gl.bindBuffer(gl.ARRAY_BUFFER, bufferEixos2D);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-2,0, 2,0, 0,-2, 0,2]), gl.STATIC_DRAW);
+
+  // Eixos e grid 3D: gerados uma vez
+  const { posicoes, segmentos } = gerarEixosGrid3D();
+  eixos3DSegmentos = segmentos;
+  gl.bindBuffer(gl.ARRAY_BUFFER, bufferEixos3D);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(posicoes), gl.STATIC_DRAW);
+
+  gl.enable(gl.BLEND);
+  gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+
+  canvas.addEventListener('webglcontextlost', (e) => {
+    e.preventDefault();
+    if (animId) cancelAnimationFrame(animId);
+  });
+
+  canvas.addEventListener('webglcontextrestored', () => {
+    inicializarWebGL(canvas);
+    iniciarLoop(canvas);
+  });
+
+  return true;
+}
+
+// Gera vértices de linhas de grid no range [-limite, +limite] com passo `passo`
+function gerarVerticesGrid(passo, limite) {
+  const verts = [];
+  for (let x = -limite; x <= limite + 1e-9; x += passo) {
+    const xi = Math.round(x / passo) * passo;
+    verts.push(xi, -limite, xi, limite);
+  }
+  for (let y = -limite; y <= limite + 1e-9; y += passo) {
+    const yi = Math.round(y / passo) * passo;
+    verts.push(-limite, yi, limite, yi);
+  }
+  return verts;
+}
+
+function criarPrograma(vertSrc, fragSrc) {
+  const vert = compilarShader(gl.VERTEX_SHADER, vertSrc);
+  const frag = compilarShader(gl.FRAGMENT_SHADER, fragSrc);
+  if (!vert || !frag) return null;
+
+  const prog = gl.createProgram();
+  gl.attachShader(prog, vert);
+  gl.attachShader(prog, frag);
+  gl.linkProgram(prog);
+
+  if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) {
+    console.error('Erro ao linkar programa:', gl.getProgramInfoLog(prog));
+    return null;
+  }
+  return prog;
+}
+
+// CG: cria uma textura WebGL a partir de um canvas procedural. Tamanho potência
+// de dois permite repetição (REPEAT) no WebGL 1.0.
+function criarTexturaGL(canvas) {
+  const textura = gl.createTexture();
+  gl.bindTexture(gl.TEXTURE_2D, textura);
+  gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, canvas);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+  gl.bindTexture(gl.TEXTURE_2D, null);
+  return textura;
+}
+
+// CG: textura procedural do alvo. As diagonais tornam rotação e cisalhamento
+// imediatamente perceptíveis e a transparência mantém o objeto visível por baixo.
+function createStripeTexture(size = 64) {
+  const canvas = document.createElement('canvas');
+  canvas.width = canvas.height = size;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = 'rgba(255,255,255,0.34)';
+  ctx.fillRect(0, 0, size, size);
+  ctx.strokeStyle = 'rgba(255,255,255,0.95)';
+  ctx.lineWidth = Math.max(3, size / 12);
+  const passo = size / 3;
+  for (let d = -size; d <= size * 2; d += passo) {
+    ctx.beginPath();
+    ctx.moveTo(d, 0);
+    ctx.lineTo(d - size, size);
+    ctx.stroke();
+  }
+  return criarTexturaGL(canvas);
+}
+
+// CG: textura procedural de orientação. A grade evidencia escala/cisalhamento e
+// a seta evidencia a direção da superfície após uma rotação.
+function createObjectTexture(size = 64) {
+  const canvas = document.createElement('canvas');
+  canvas.width = canvas.height = size;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#dedee8';
+  ctx.fillRect(0, 0, size, size);
+  ctx.strokeStyle = 'rgba(35,45,65,0.42)';
+  ctx.lineWidth = 1;
+  const passo = size / 4;
+  for (let p = 0; p <= size; p += passo) {
+    ctx.beginPath(); ctx.moveTo(p, 0); ctx.lineTo(p, size); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(0, p); ctx.lineTo(size, p); ctx.stroke();
+  }
+  return criarTexturaGL(canvas);
+}
+
+function compilarShader(tipo, src) {
+  const shader = gl.createShader(tipo);
+  gl.shaderSource(shader, src);
+  gl.compileShader(shader);
+  if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+    console.error('Erro ao compilar shader:', gl.getShaderInfoLog(shader));
+    gl.deleteShader(shader);
+    return null;
+  }
+  return shader;
+}
+
+// --- Game loop ---
+
+function iniciarLoop(canvas) {
+  function frame(agora) {
+    const feedbackAtivo = updateFeedbackState(agora);
+    if (estado.precisaRenderizar) {
+      renderizar(canvas, agora);
+      // Durante um pulso, o próximo frame também precisa atualizar os uniforms.
+      estado.precisaRenderizar = feedbackAtivo;
+    }
+    animId = requestAnimationFrame(frame);
+  }
+  animId = requestAnimationFrame(frame);
+}
+
+// CG: inicia feedback por uniform. A duração curta evita um game loop permanente.
+function triggerSuccessFeedback() {
+  estado.feedback = { modo: 1, inicio: performance.now(), duracao: 1050 };
+  estado.precisaRenderizar = true;
+}
+
+function triggerErrorFeedback() {
+  estado.feedback = { modo: -1, inicio: performance.now(), duracao: 650 };
+  estado.precisaRenderizar = true;
+}
+
+function updateFeedbackState(agora = performance.now()) {
+  const feedback = estado.feedback;
+  if (!feedback || feedback.modo === 0) return false;
+  if (agora - feedback.inicio >= feedback.duracao) {
+    estado.feedback = { modo: 0, inicio: 0, duracao: 0 };
+    estado.precisaRenderizar = true;
+    return false;
+  }
+  return true;
+}
+
+function getFeedbackUniforms(agora = performance.now()) {
+  const feedback = estado.feedback;
+  if (!feedback || feedback.modo === 0) {
+    return { modo: 0, glow: 0, tempo: agora / 1000 };
+  }
+  const progresso = Math.min(1, Math.max(0, (agora - feedback.inicio) / feedback.duracao));
+  return {
+    modo: feedback.modo,
+    glow: Math.sin(progresso * Math.PI),
+    tempo: agora / 1000,
+  };
+}
+
+// --- Renderização ---
+
+function renderizar(canvas, agora = performance.now()) {
+  if (!gl) return;
+  if (!estado.dadosFase || estado.objetos.length === 0) return;
+
+  gl.viewport(0, 0, canvas.width, canvas.height);
+
+  if (estado.modo3D) {
+    gl.clearColor(0.025, 0.035, 0.075, 1);
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+    renderizar3D(agora);
+  } else {
+    gl.clearColor(0.965, 0.973, 0.992, 1);
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+    renderizarGrid();
+    renderizar2D(agora);
+  }
+}
+
+// Desenha o grid de linhas pontilhadas no fundo do canvas 2D
+function renderizarGrid() {
+  if (!programaGrid) return;
+  gl.useProgram(programaGrid);
+
+  const locPos = gl.getAttribLocation(programaGrid, 'a_posicao');
+  gl.bindBuffer(gl.ARRAY_BUFFER, bufferGrid);
+  gl.enableVertexAttribArray(locPos);
+  gl.vertexAttribPointer(locPos, 2, gl.FLOAT, false, 0, 0);
+  gl.uniform2f(gl.getUniformLocation(programaGrid, 'u_pan'), estado.panX, estado.panY);
+
+  gl.drawArrays(gl.LINES, 0, verticesGridCount);
+
+  // CG: X e Y usam cores discretas distintas para orientar translações e rotações.
+  gl.useProgram(programa2D);
+  const eixoPos = gl.getAttribLocation(programa2D, 'a_posicao');
+  gl.bindBuffer(gl.ARRAY_BUFFER, bufferEixos2D);
+  gl.enableVertexAttribArray(eixoPos);
+  gl.vertexAttribPointer(eixoPos, 2, gl.FLOAT, false, 0, 0);
+  gl.uniformMatrix3fv(gl.getUniformLocation(programa2D, 'u_transform'), false, identidade3());
+  gl.uniform2f(gl.getUniformLocation(programa2D, 'u_pan'), estado.panX, estado.panY);
+  gl.uniform4f(gl.getUniformLocation(programa2D, 'u_cor'), 0.86, 0.28, 0.30, 0.48);
+  gl.drawArrays(gl.LINES, 0, 2);
+  gl.uniform4f(gl.getUniformLocation(programa2D, 'u_cor'), 0.18, 0.55, 0.78, 0.48);
+  gl.drawArrays(gl.LINES, 2, 2);
+}
+
+function renderizar2D(agora) {
+  if (!programaMaterial2D) return;
+
+  const n = estado.dimensaoMatriz;
+  const fase = estado.dadosFase;
+  const feedback = getFeedbackUniforms(agora);
+
+  // Alvo unificado (fases como encaixe-cruz): uma única área tracejada no centro
+  if (fase.alvoVertices) {
+    const ident = identidade3();
+    desenharMaterial2D(fase.alvoVertices, [0.9, 0.2, 0.2], 0.42, ident, n, true, false, feedback);
+    desenharOutlineTracejado2D(fase.alvoVertices, [0.9, 0.2, 0.2], ident, n);
+  }
+
+  estado.objetos.forEach((obj, idx) => {
+    const matrizTransform = calcularMatrizAcumulada(idx);
+
+    // Alvo por objeto: só desenha se não há alvoVertices unificado
+    if (!fase.alvoVertices) {
+      const matrizAlvo = fase.matrizAlvoObjetos
+        ? fase.matrizAlvoObjetos[idx]
+        : fase.matrizAlvo;
+      if (matrizAlvo) {
+        desenharMaterial2D(obj.vertices, obj.cor, 0.40, matrizAlvo, n, true, false, feedback);
+        desenharOutlineTracejado2D(obj.vertices, obj.cor, matrizAlvo, n);
+      }
+    }
+
+    // Objeto transformado pelo jogador
+    const destaque = idx === estado.objetoAtivo;
+    desenharMaterial2D(obj.vertices, obj.cor, 1.0, matrizTransform, n, false, destaque, feedback);
+    if (destaque) desenharOutlineSelecao2D(obj.vertices, matrizTransform, n);
+  });
+}
+
+// CG: calcula UVs no espaço local uma única vez. Isso faz a grade desenhada na
+// textura deformar junto com a matriz aplicada pelo jogador.
+function obterGeometria2D(vertices) {
+  let geo = cacheGeometria2D.get(vertices);
+  if (geo) return geo;
+  let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+  for (let i = 0; i < vertices.length; i += 2) {
+    minX = Math.min(minX, vertices[i]); maxX = Math.max(maxX, vertices[i]);
+    minY = Math.min(minY, vertices[i + 1]); maxY = Math.max(maxY, vertices[i + 1]);
+  }
+  const dx = Math.max(maxX - minX, 1e-6);
+  const dy = Math.max(maxY - minY, 1e-6);
+  const uvs = [];
+  for (let i = 0; i < vertices.length; i += 2) {
+    uvs.push((vertices[i] - minX) / dx, (vertices[i + 1] - minY) / dy);
+  }
+  const positionBuffer = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
+  const uvBuffer = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, uvBuffer);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(uvs), gl.STATIC_DRAW);
+  geo = { positionBuffer, uvBuffer, count: vertices.length / 2 };
+  cacheGeometria2D.set(vertices, geo);
+  return geo;
+}
+
+function desenharMaterial2D(vertices, cor, alfa, matrizTransform, n, ehAlvo, destaque, feedback) {
+  const prog = programaMaterial2D;
+  gl.useProgram(prog);
+  const geo = obterGeometria2D(vertices);
+  const locPos = gl.getAttribLocation(prog, 'a_posicao');
+  const locUV = gl.getAttribLocation(prog, 'a_uv');
+  gl.bindBuffer(gl.ARRAY_BUFFER, geo.positionBuffer);
+  gl.enableVertexAttribArray(locPos);
+  gl.vertexAttribPointer(locPos, 2, gl.FLOAT, false, 0, 0);
+  gl.bindBuffer(gl.ARRAY_BUFFER, geo.uvBuffer);
+  gl.enableVertexAttribArray(locUV);
+  gl.vertexAttribPointer(locUV, 2, gl.FLOAT, false, 0, 0);
+
+  gl.uniformMatrix3fv(gl.getUniformLocation(prog, 'u_transform'), false, expandir2x2Para3x3(matrizTransform, n));
+  gl.uniform2f(gl.getUniformLocation(prog, 'u_pan'), estado.panX, estado.panY);
+  gl.uniform4f(gl.getUniformLocation(prog, 'u_cor'), cor[0], cor[1], cor[2], alfa);
+  gl.uniform1f(gl.getUniformLocation(prog, 'u_targetMode'), ehAlvo ? 1 : 0);
+  gl.uniform1f(gl.getUniformLocation(prog, 'u_selectedObject'), destaque ? 1 : 0);
+  gl.uniform1f(gl.getUniformLocation(prog, 'u_feedbackMode'), feedback.modo);
+  gl.uniform1f(gl.getUniformLocation(prog, 'u_glowAmount'), ehAlvo ? 0 : feedback.glow);
+  gl.uniform1f(gl.getUniformLocation(prog, 'u_time'), feedback.tempo);
+  gl.activeTexture(gl.TEXTURE0);
+  gl.bindTexture(gl.TEXTURE_2D, ehAlvo ? texturaAlvo : texturaObjeto);
+  gl.uniform1i(gl.getUniformLocation(prog, 'u_texture'), 0);
+  gl.drawArrays(gl.TRIANGLES, 0, geo.count);
+}
+
+// CG: halo geométrico de seleção é desenhado separadamente e não participa da
+// matriz final nem da checagem de vitória.
+function desenharOutlineSelecao2D(vertices, matrizTransform, n) {
+  gl.useProgram(programa2D);
+  const outlineVerts = gerarOutline(vertices);
+  const locPos = gl.getAttribLocation(programa2D, 'a_posicao');
+  gl.bindBuffer(gl.ARRAY_BUFFER, bufferVertices);
+  gl.bufferData(gl.ARRAY_BUFFER, outlineVerts, gl.DYNAMIC_DRAW);
+  gl.enableVertexAttribArray(locPos);
+  gl.vertexAttribPointer(locPos, 2, gl.FLOAT, false, 0, 0);
+  gl.uniformMatrix3fv(gl.getUniformLocation(programa2D, 'u_transform'), false, expandir2x2Para3x3(matrizTransform, n));
+  gl.uniform2f(gl.getUniformLocation(programa2D, 'u_pan'), estado.panX, estado.panY);
+  gl.uniform4f(gl.getUniformLocation(programa2D, 'u_cor'), 1, 0.78, 0.08, 0.95);
+  gl.drawArrays(gl.LINE_LOOP, 0, outlineVerts.length / 2);
+}
+
+// Desenha o alvo com hachura diagonal (shader tracejado sobre os próprios triângulos do objeto)
+// Funciona corretamente tanto para quads simples quanto para formas complexas (letras)
+function desenharOutlineTracejado2D(vertices, cor, matrizAlvo, n) {
+  if (!programaTracejado) return;
+  gl.useProgram(programaTracejado);
+
+  const locPos = gl.getAttribLocation(programaTracejado, 'a_posicao');
+  const locTransform = gl.getUniformLocation(programaTracejado, 'u_transform');
+  const locCor = gl.getUniformLocation(programaTracejado, 'u_cor');
+  const locPan = gl.getUniformLocation(programaTracejado, 'u_pan');
+
+  const matrizShader = expandir2x2Para3x3(matrizAlvo, n);
+
+  const dados = new Float32Array(vertices);
+  gl.bindBuffer(gl.ARRAY_BUFFER, bufferVertices);
+  gl.bufferData(gl.ARRAY_BUFFER, dados, gl.DYNAMIC_DRAW);
+  gl.enableVertexAttribArray(locPos);
+  gl.vertexAttribPointer(locPos, 2, gl.FLOAT, false, 0, 0);
+
+  gl.uniformMatrix3fv(locTransform, false, matrizShader);
+  gl.uniform2f(locPan, estado.panX, estado.panY);
+
+  const [r, g, b] = cor;
+  gl.uniform4f(locCor, r, g, b, 1.0);
+  // Usa GL_TRIANGLES para exibir a forma real do alvo com padrão diagonal
+  // Funciona para qualquer geometria (quads, letras, peças irregulares)
+  gl.drawArrays(gl.TRIANGLES, 0, dados.length / 2);
+
+  gl.useProgram(programa2D);
+}
+
+// Expande uma matriz 2×2 para 3×3 se necessário (para compatibilidade com o shader mat3)
+function expandir2x2Para3x3(m, n) {
+  if (n === 2) {
+    return new Float32Array([
+      m[0], m[1], 0,
+      m[2], m[3], 0,
+      0,    0,    1,
+    ]);
+  }
+  return m;
+}
+
+function gerarOutline(vertices) {
+  // Extrai os 4 cantos do quad de 2 triângulos (12 valores = 6 pares xy)
+  if (vertices.length === 12) {
+    return new Float32Array([
+      vertices[0], vertices[1],
+      vertices[2], vertices[3],
+      vertices[4], vertices[5],
+      vertices[10], vertices[11],
+    ]);
+  }
+  // Para outras geometrias (letras, peças), usa os primeiros vértices únicos
+  const unicos = [];
+  const vistos = new Set();
+  for (let i = 0; i < vertices.length; i += 2) {
+    const k = `${vertices[i].toFixed(4)},${vertices[i + 1].toFixed(4)}`;
+    if (!vistos.has(k)) {
+      vistos.add(k);
+      unicos.push(vertices[i], vertices[i + 1]);
+    }
+  }
+  return new Float32Array(unicos);
+}
+
+function renderizar3D(agora) {
+  if (!programaMaterial3D) return;
+  gl.enable(gl.DEPTH_TEST);
+
+  const canvas = gl.canvas;
+  const aspect = canvas.width / canvas.height;
+  const proj = perspectiva(Math.PI / 4, aspect, 0.1, 100);
+  const camera = obterCamera3D(estado.orbitTheta, estado.orbitPhi);
+  const view = camera.view;
+  const feedback = getFeedbackUniforms(agora);
+
+  // Eixos e grid de referência 3D — desenhados antes dos objetos
+  renderizarEixosGrid3D(proj, view);
+  gl.useProgram(programa3D);
+
+  const locProj = gl.getUniformLocation(programa3D, 'u_projecao');
+  const locView = gl.getUniformLocation(programa3D, 'u_view');
+  gl.uniformMatrix4fv(locProj, false, proj);
+  gl.uniformMatrix4fv(locView, false, view);
+
+  const fase = estado.dadosFase;
+
+  estado.objetos.forEach((obj, idx) => {
+    const matrizTransform = calcularMatrizAcumulada(idx);
+    const matrizAlvo = fase.matrizAlvoObjetos
+      ? fase.matrizAlvoObjetos[idx]
+      : (fase.matrizAlvo || identidade4());
+
+    // CG: alvo transparente não escreve profundidade, evitando esconder o objeto.
+    gl.depthMask(false);
+    desenharMaterial3D(obj.vertices3D, obj.cor, 0.42, matrizAlvo, proj, view, camera.eye, true, false, feedback);
+    desenharOutline3D(programa3D, obj.vertices3D, [0.75, 0.88, 1.0], 0.55, matrizAlvo, false, true);
+    gl.depthMask(true);
+
+    // Objeto do jogador
+    const destaque = idx === estado.objetoAtivo;
+    desenharMaterial3D(obj.vertices3D, obj.cor, 1.0, matrizTransform, proj, view, camera.eye, false, destaque, feedback);
+    if (destaque) {
+      desenharOutline3D(programa3D, obj.vertices3D, [1, 0.85, 0], 0.72, matrizTransform, true, false);
+    }
+  });
+
+  gl.disable(gl.DEPTH_TEST);
+
+  // Labels X/Y/Z projetados sobre o canvas overlay
+  desenharLabelsEixos(proj, view);
+}
+
+// CG: gera normais planas por triângulo e UVs por projeção dominante. Como as
+// peças atuais são malhas trianguladas, isso serve para cubos de qualquer tamanho.
+function obterGeometria3D(vertices) {
+  let geo = cacheGeometria3D.get(vertices);
+  if (geo) return geo;
+  const normals = new Float32Array(vertices.length);
+  const uvs = new Float32Array((vertices.length / 3) * 2);
+  let minX=Infinity,minY=Infinity,minZ=Infinity,maxX=-Infinity,maxY=-Infinity,maxZ=-Infinity;
+  for (let i=0; i<vertices.length; i+=3) {
+    minX=Math.min(minX,vertices[i]); maxX=Math.max(maxX,vertices[i]);
+    minY=Math.min(minY,vertices[i+1]); maxY=Math.max(maxY,vertices[i+1]);
+    minZ=Math.min(minZ,vertices[i+2]); maxZ=Math.max(maxZ,vertices[i+2]);
+  }
+  const dx=Math.max(maxX-minX,1e-6), dy=Math.max(maxY-minY,1e-6), dz=Math.max(maxZ-minZ,1e-6);
+  for (let i=0; i<vertices.length; i+=9) {
+    const ax=vertices[i], ay=vertices[i+1], az=vertices[i+2];
+    const bx=vertices[i+3], by=vertices[i+4], bz=vertices[i+5];
+    const cx=vertices[i+6], cy=vertices[i+7], cz=vertices[i+8];
+    const ux=bx-ax, uy=by-ay, uz=bz-az, vx=cx-ax, vy=cy-ay, vz=cz-az;
+    let nx=uy*vz-uz*vy, ny=uz*vx-ux*vz, nz=ux*vy-uy*vx;
+    const len=Math.hypot(nx,ny,nz)||1; nx/=len; ny/=len; nz/=len;
+    for (let v=0; v<3; v++) {
+      const pi=i+v*3, vi=(pi/3)*2;
+      normals[pi]=nx; normals[pi+1]=ny; normals[pi+2]=nz;
+      if (Math.abs(nz)>=Math.abs(nx) && Math.abs(nz)>=Math.abs(ny)) {
+        uvs[vi]=(vertices[pi]-minX)/dx; uvs[vi+1]=(vertices[pi+1]-minY)/dy;
+      } else if (Math.abs(ny)>=Math.abs(nx)) {
+        uvs[vi]=(vertices[pi]-minX)/dx; uvs[vi+1]=(vertices[pi+2]-minZ)/dz;
+      } else {
+        uvs[vi]=(vertices[pi+2]-minZ)/dz; uvs[vi+1]=(vertices[pi+1]-minY)/dy;
+      }
+    }
+  }
+  const positionBuffer=gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER,positionBuffer);
+  gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(vertices),gl.STATIC_DRAW);
+  const normalBuffer=gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER,normalBuffer);
+  gl.bufferData(gl.ARRAY_BUFFER,normals,gl.STATIC_DRAW);
+  const uvBuffer=gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER,uvBuffer);
+  gl.bufferData(gl.ARRAY_BUFFER,uvs,gl.STATIC_DRAW);
+  geo={positionBuffer,normalBuffer,uvBuffer,count:vertices.length/3};
+  cacheGeometria3D.set(vertices,geo);
+  return geo;
+}
+
+// CG: inversa-transposta da parte 3x3 da model matrix. Corrige as normais quando
+// a matriz do jogador contém escala não uniforme ou cisalhamento.
+function calcularMatrizNormal(m) {
+  const a00=m[0],a01=m[4],a02=m[8],a10=m[1],a11=m[5],a12=m[9],a20=m[2],a21=m[6],a22=m[10];
+  const b01=a22*a11-a12*a21, b11=-a22*a10+a12*a20, b21=a21*a10-a11*a20;
+  const det=a00*b01+a01*b11+a02*b21;
+  if (Math.abs(det)<1e-8) return new Float32Array([1,0,0,0,1,0,0,0,1]);
+  const d=1/det;
+  // Resultado já organizado em column-major e transposto para transformar normais.
+  return new Float32Array([
+    b01*d, (-a22*a01+a02*a21)*d, (a12*a01-a02*a11)*d,
+    b11*d, (a22*a00-a02*a20)*d, (-a12*a00+a02*a10)*d,
+    b21*d, (-a21*a00+a01*a20)*d, (a11*a00-a01*a10)*d,
+  ]);
+}
+
+function desenharMaterial3D(vertices, cor, alfa, matriz, proj, view, eye, ehAlvo, destaque, feedback) {
+  const prog = programaMaterial3D;
+  gl.useProgram(prog);
+  const geo = obterGeometria3D(vertices);
+  const atributos = [
+    ['a_posicao', geo.positionBuffer, 3],
+    ['a_normal',  geo.normalBuffer,   3],
+    ['a_uv',      geo.uvBuffer,       2],
+  ];
+  for (const [nome, buffer, tamanho] of atributos) {
+    const loc = gl.getAttribLocation(prog, nome);
+    gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+    gl.enableVertexAttribArray(loc);
+    gl.vertexAttribPointer(loc, tamanho, gl.FLOAT, false, 0, 0);
+  }
+  gl.uniformMatrix4fv(gl.getUniformLocation(prog, 'u_transform'),    false, matriz);
+  gl.uniformMatrix4fv(gl.getUniformLocation(prog, 'u_projecao'),     false, proj);
+  gl.uniformMatrix4fv(gl.getUniformLocation(prog, 'u_view'),         false, view);
+  gl.uniformMatrix3fv(gl.getUniformLocation(prog, 'u_normalMatrix'), false, calcularMatrizNormal(matriz));
+  gl.uniform4f(gl.getUniformLocation(prog, 'u_cor'), cor[0], cor[1], cor[2], alfa);
+  gl.uniform3f(gl.getUniformLocation(prog, 'u_lightDir'), -0.45, -0.85, -0.35);
+  gl.uniform3f(gl.getUniformLocation(prog, 'u_cameraPos'), eye[0], eye[1], eye[2]);
+  gl.uniform1f(gl.getUniformLocation(prog, 'u_ambientStrength'),  ehAlvo ? 0.8  : 0.34);
+  gl.uniform1f(gl.getUniformLocation(prog, 'u_diffuseStrength'),  ehAlvo ? 0.2  : 0.72);
+  gl.uniform1f(gl.getUniformLocation(prog, 'u_specularStrength'), ehAlvo ? 0.0  : 0.34);
+  gl.uniform1f(gl.getUniformLocation(prog, 'u_shininess'),        24.0);
+  gl.uniform1f(gl.getUniformLocation(prog, 'u_time'),        feedback.tempo);
+  gl.uniform1f(gl.getUniformLocation(prog, 'u_feedbackMode'), feedback.modo);
+  gl.uniform1f(gl.getUniformLocation(prog, 'u_glowAmount'),   ehAlvo ? 0 : feedback.glow * 0.75);
+  gl.uniform1f(gl.getUniformLocation(prog, 'u_selectedObject'), destaque ? 1 : 0);
+  gl.uniform1f(gl.getUniformLocation(prog, 'u_targetMode'),    ehAlvo ? 1 : 0);
+  gl.activeTexture(gl.TEXTURE0);
+  gl.bindTexture(gl.TEXTURE_2D, ehAlvo ? texturaAlvo : texturaObjeto);
+  gl.uniform1i(gl.getUniformLocation(prog, 'u_texture'), 0);
+  gl.drawArrays(gl.TRIANGLES, 0, geo.count);
+}
+
+// Outline 3D via técnica de hull invertido:
+// Desenha a geometria ligeiramente maior com face-culling invertido
+function desenharOutline3D(prog, vertices, cor, alfa, matriz, ehSelecao, ehAlvo) {
+  gl.useProgram(prog);
+  const locPos = gl.getAttribLocation(prog, 'a_posicao');
+  const locTransform = gl.getUniformLocation(prog, 'u_transform');
+  const locCor = gl.getUniformLocation(prog, 'u_cor');
+
+  // Escala ligeiramente maior no espaço local do objeto
+  const fator = ehSelecao ? 1.12 : 1.08;
+  const matrizOutline = multiplicar(matriz, escala3D(fator, fator, fator), 4);
+
+  const dados = new Float32Array(vertices);
+  gl.bindBuffer(gl.ARRAY_BUFFER, bufferVertices);
+  gl.bufferData(gl.ARRAY_BUFFER, dados, gl.DYNAMIC_DRAW);
+  gl.enableVertexAttribArray(locPos);
+  gl.vertexAttribPointer(locPos, 3, gl.FLOAT, false, 0, 0);
+
+  gl.uniformMatrix4fv(locTransform, false, matrizOutline);
+
+  const [r, g, b] = cor;
+  // Alvo: borda com a cor do objeto (mais clara); seleção: amarelo
+  gl.uniform4f(locCor, r, g, b, alfa);
+
+  // Hull invertido: culling de faces frontais para mostrar apenas as traseiras
+  gl.enable(gl.CULL_FACE);
+  gl.cullFace(gl.FRONT);
+  gl.drawArrays(gl.TRIANGLES, 0, dados.length / 3);
+  gl.disable(gl.CULL_FACE);
+}
+
+// Câmera esférica: theta = ângulo horizontal, phi = ângulo vertical
+// O jogador controla theta/phi via drag do mouse para orbitar em torno da origem
+function obterCamera3D(theta, phi) {
+  const dist = 3.5;
+  const eye = [
+    dist * Math.sin(theta) * Math.cos(phi),
+    dist * Math.sin(phi),
+    dist * Math.cos(theta) * Math.cos(phi),
+  ];
+  return { eye, view: lookAt(eye, [0, 0, 0], [0, 1, 0]) };
+}
+
+// Multiplica mat4 (Float32Array column-major) por vec4 → vec4
+function multMat4Vec4(m, v) {
+  return [
+    m[0]*v[0] + m[4]*v[1] + m[8]*v[2]  + m[12]*v[3],
+    m[1]*v[0] + m[5]*v[1] + m[9]*v[2]  + m[13]*v[3],
+    m[2]*v[0] + m[6]*v[1] + m[10]*v[2] + m[14]*v[3],
+    m[3]*v[0] + m[7]*v[1] + m[11]*v[2] + m[15]*v[3],
+  ];
+}
+
+// Desenha labels X/Y/Z num canvas 2D sobreposto ao WebGL
+function desenharLabelsEixos(proj, view) {
+  const labelCanvas = document.getElementById('canvas-labels');
+  if (!labelCanvas) return;
+  const wc = gl.canvas;
+  if (labelCanvas.width !== wc.width) labelCanvas.width = wc.width;
+  if (labelCanvas.height !== wc.height) labelCanvas.height = wc.height;
+  const ctx = labelCanvas.getContext('2d');
+  ctx.clearRect(0, 0, wc.width, wc.height);
+
+  const tips = [
+    { pos: [1.9, 0, 0, 1], label: 'X', cor: '#e05050' },
+    { pos: [0, 1.9, 0, 1], label: 'Y', cor: '#40d86a' },
+    { pos: [0, 0, 1.9, 1], label: 'Z', cor: '#4090e8' },
+  ];
+
+  const marg = 18;
+  ctx.font = 'bold 16px "Courier New", monospace';
+  for (const { pos, label, cor } of tips) {
+    const clip = multMat4Vec4(proj, multMat4Vec4(view, pos));
+    if (clip[3] <= 0.01) continue;
+    const rawNx = (clip[0] / clip[3] + 1) * 0.5 * wc.width;
+    const rawNy = (1 - (clip[1] / clip[3] + 1) * 0.5) * wc.height;
+    // Clamp to canvas so labels remain visible even when axis tip is off-screen
+    const nx = Math.max(marg, Math.min(wc.width - marg, rawNx));
+    const ny = Math.max(marg + 2, Math.min(wc.height - marg, rawNy));
+    ctx.fillStyle = cor;
+    ctx.strokeStyle = 'rgba(0,0,0,0.6)';
+    ctx.lineWidth = 3;
+    ctx.strokeText(label, nx, ny);
+    ctx.fillText(label, nx, ny);
+  }
+}
+
+// Gera eixos coloridos (X=vermelho, Y=verde, Z=azul) e grid de chão no plano XZ
+function gerarEixosGrid3D() {
+  const posicoes = [];
+  const segmentos = [];
+
+  function adicionarLinha(x0,y0,z0, x1,y1,z1) {
+    posicoes.push(x0,y0,z0, x1,y1,z1);
+  }
+
+  // Eixo X (vermelho)
+  const ofsX = posicoes.length / 3;
+  adicionarLinha(-2,0,0, 2,0,0);
+  segmentos.push({ offset: ofsX, count: 2, cor: [0.85, 0.2, 0.2, 0.9] });
+
+  // Eixo Y (verde)
+  const ofsY = posicoes.length / 3;
+  adicionarLinha(0,-2,0, 0,2,0);
+  segmentos.push({ offset: ofsY, count: 2, cor: [0.2, 0.78, 0.35, 0.9] });
+
+  // Eixo Z (azul)
+  const ofsZ = posicoes.length / 3;
+  adicionarLinha(0,0,-2, 0,0,2);
+  segmentos.push({ offset: ofsZ, count: 2, cor: [0.2, 0.55, 0.9, 0.9] });
+
+  // Grid de chão no plano XZ (Y=0) — cinza claro
+  const ofsGrid = posicoes.length / 3;
+  let countGrid = 0;
+  const passo = 0.5;
+  const lim   = 2.0;
+  for (let x = -lim; x <= lim + 1e-9; x += passo) {
+    const xi = Math.round(x / passo) * passo;
+    adicionarLinha(xi, 0, -lim, xi, 0, lim);
+    countGrid += 2;
+  }
+  for (let z = -lim; z <= lim + 1e-9; z += passo) {
+    const zi = Math.round(z / passo) * passo;
+    adicionarLinha(-lim, 0, zi, lim, 0, zi);
+    countGrid += 2;
+  }
+  segmentos.push({ offset: ofsGrid, count: countGrid, cor: [0.38, 0.46, 0.60, 0.24] });
+
+  return { posicoes, segmentos };
+}
+
+// Desenha eixos e grid de chão 3D
+function renderizarEixosGrid3D(proj, view) {
+  if (!programa3D || !bufferEixos3D) return;
+  gl.useProgram(programa3D);
+
+  const locPos   = gl.getAttribLocation(programa3D, 'a_posicao');
+  const locTrans = gl.getUniformLocation(programa3D, 'u_transform');
+  const locProj  = gl.getUniformLocation(programa3D, 'u_projecao');
+  const locView  = gl.getUniformLocation(programa3D, 'u_view');
+  const locCor   = gl.getUniformLocation(programa3D, 'u_cor');
+
+  gl.uniformMatrix4fv(locProj, false, proj);
+  gl.uniformMatrix4fv(locView, false, view);
+  gl.uniformMatrix4fv(locTrans, false, identidade4());
+
+  gl.bindBuffer(gl.ARRAY_BUFFER, bufferEixos3D);
+  gl.enableVertexAttribArray(locPos);
+  gl.vertexAttribPointer(locPos, 3, gl.FLOAT, false, 0, 0);
+
+  for (const seg of eixos3DSegmentos) {
+    gl.uniform4f(locCor, ...seg.cor);
+    gl.lineWidth(seg.cor[3] > 0.5 ? 2 : 1);
+    gl.drawArrays(gl.LINES, seg.offset, seg.count);
+  }
+  gl.lineWidth(1);
+}
+
+// --- Cálculo da matriz acumulada do objeto ---
+
+function calcularMatrizAcumulada(idxObjeto) {
+  const n = estado.dimensaoMatriz;
+  const seq = estado.sequencias[idxObjeto] || [];
+
+  const matrizes = seq.map((item) => {
+    if (item.tipo === 'salva') return item.valores;
+    if (item.tipo === 'template') return item.construir(item.params);
+    return null;
+  }).filter(Boolean);
+
+  return multiplicarSequencia(matrizes, n);
+}
+
+// Projeta o centro local do objeto para NDC, exatamente no mesmo espaço usado
+// pelo clique. Em 3D inclui model, hierarquia, view e projection; em 2D inclui pan.
+function projetarCentroObjeto(idxObjeto, canvas = gl?.canvas) {
+  const obj = estado.objetos[idxObjeto];
+  if (!obj || !canvas) return null;
+  let matriz = calcularMatrizAcumulada(idxObjeto);
+
+  if (estado.modo3D) {
+    const vertices = obj.vertices3D || [];
+    if (vertices.length === 0) return null;
+    let x=0,y=0,z=0,n=0;
+    for (let i=0;i<vertices.length;i+=3) {
+      x+=vertices[i]; y+=vertices[i+1]; z+=vertices[i+2]; n++;
+    }
+    const centro=[x/n,y/n,z/n,1];
+    const camera=obterCamera3D(estado.orbitTheta,estado.orbitPhi);
+    const proj=perspectiva(Math.PI/4,canvas.width/canvas.height,0.1,100);
+    const clip=multMat4Vec4(proj,multMat4Vec4(camera.view,multMat4Vec4(matriz,centro)));
+    if (clip[3] <= 0.0001) return null;
+    return [clip[0]/clip[3],clip[1]/clip[3]];
+  }
+
+  const vertices=obj.vertices || [];
+  if (vertices.length === 0) return null;
+  let x=0,y=0,n=0;
+  for (let i=0;i<vertices.length;i+=2) { x+=vertices[i]; y+=vertices[i+1]; n++; }
+  x/=n; y/=n;
+  if (estado.dimensaoMatriz===2) {
+    return [matriz[0]*x+matriz[2]*y+estado.panX,
+            matriz[1]*x+matriz[3]*y+estado.panY];
+  }
+  return [matriz[0]*x+matriz[3]*y+matriz[6]+estado.panX,
+          matriz[1]*x+matriz[4]*y+matriz[7]+estado.panY];
+}
+
+function marcarParaRenderizar() {
+  estado.precisaRenderizar = true;
+}
+
+// ── js/ui.js ──
+// Lógica de todos os painéis da tela de jogo
+// Construtor de matriz, sequência, salvas e templates
+
+
+
+
+
+// --- Construtor de matriz ---
+
+function renderizarConstrutor() {
+  const n = estado.dimensaoMatriz;
+  const grid = document.getElementById('grid-matriz');
+  grid.innerHTML = '';
+  grid.style.gridTemplateColumns = `repeat(${n}, 1fr)`;
+  grid.style.gridTemplateRows = `repeat(${n}, 1fr)`;
+
+  // Inicializa valores se vazio (identidade)
+  if (estado.valoresConstrutor.length !== n * n) {
+    const id = n === 3 ? identidade3() : n === 4 ? identidade4() : new Float32Array([1, 0, 0, 1]);
+    estado.valoresConstrutor = Array.from(id).map((v) => String(v));
+  }
+
+  // Cria um input por célula, em ordem row-major para exibição
+  for (let lin = 0; lin < n; lin++) {
+    for (let col = 0; col < n; col++) {
+      // Converte row-major visual → column-major de armazenamento
+      const idx = col * n + lin;
+
+      const input = document.createElement('input');
+      input.type = 'text';
+      input.className = 'celula-matriz';
+      input.value = estado.valoresConstrutor[idx];
+      input.dataset.idx = idx;
+
+      input.addEventListener('focus', () => {
+        estado.celulaAtiva = idx;
+        input.select();
+      });
+
+      input.addEventListener('input', () => {
+        estado.valoresConstrutor[idx] = input.value;
+        atualizarResultado();
+      });
+
+      grid.appendChild(input);
+    }
+  }
+}
+
+// Insere valor da calculadora na célula ativa
+function registrarCalculadora() {
+  document.querySelectorAll('.botao-calculadora').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      if (estado.celulaAtiva === null) return;
+      const val = btn.textContent;
+      const input = document.querySelector(`.celula-matriz[data-idx="${estado.celulaAtiva}"]`);
+      if (!input) return;
+      const pos = input.selectionStart;
+      input.value = input.value.slice(0, pos) + val + input.value.slice(input.selectionEnd);
+      estado.valoresConstrutor[estado.celulaAtiva] = input.value;
+      input.focus();
+      atualizarResultado();
+    });
+  });
+}
+
+// Tenta avaliar os valores do construtor como expressões numéricas
+function obterMatrizConstrutor() {
+  const n = estado.dimensaoMatriz;
+  const vals = estado.valoresConstrutor.map(avaliarExpressao);
+  if (vals.some((v) => v === null)) return null;
+  return new Float32Array(vals);
+}
+
+// --- Salvar matriz ---
+
+function registrarSalvarMatriz() {
+  document.getElementById('botao-salvar-matriz').addEventListener('click', salvarMatrizAtual);
+}
+
+function salvarMatrizAtual() {
+  const matriz = obterMatrizConstrutor();
+  if (!matriz) {
+    destacarErro();
+    return;
+  }
+  const rotulos = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  const rotulo = rotulos[estado.matrizesSalvas.length % rotulos.length];
+  estado.matrizesSalvas.push({ rotulo, valores: matriz, dimensao: estado.dimensaoMatriz });
+  renderizarSalvas();
+}
+
+function destacarErro() {
+  document.querySelectorAll('.celula-matriz').forEach((el) => {
+    const v = avaliarExpressao(el.value);
+    if (v === null) el.classList.add('celula-erro');
+    else el.classList.remove('celula-erro');
+  });
+}
+
+function renderizarSalvas() {
+  const lista = document.getElementById('lista-salvas');
+  lista.innerHTML = '';
+  estado.matrizesSalvas.forEach((m, idx) => {
+    const li = document.createElement('li');
+    li.className = 'salva-item';
+    li.textContent = m.rotulo;
+    li.title = formatarMatriz(m.valores, m.dimensao);
+    li.draggable = true;
+
+    // Clique: carrega no construtor
+    li.addEventListener('click', () => carregarSalvaNoConstutor(idx));
+
+    lista.appendChild(li);
+  });
+}
+
+function carregarSalvaNoConstutor(idx) {
+  const m = estado.matrizesSalvas[idx];
+  estado.valoresConstrutor = Array.from(m.valores).map((v) => String(+v.toFixed(6)));
+  estado.dimensaoMatriz = m.dimensao;
+  renderizarConstrutor();
+}
+
+// --- Sequência ---
+
+function registrarSequencia() {
+  document.getElementById('botao-adicionar-sequencia').addEventListener('click', () => {
+    const matriz = obterMatrizConstrutor();
+    if (!matriz) {
+      destacarErro();
+      return;
+    }
+    const n = estado.dimensaoMatriz;
+    const rotulo = `M${estado.sequencias[estado.objetoAtivo].length + 1}`;
+    estado.sequencias[estado.objetoAtivo].push({
+      tipo: 'salva',
+      rotulo,
+      valores: matriz,
+      n,
+      construir: () => matriz,
+    });
+    renderizarSequencia();
+    marcarParaRenderizar();
+  });
+}
+
+function renderizarSequencia() {
+  const lista = document.getElementById('lista-sequencia');
+  lista.innerHTML = '';
+
+  const seq = estado.sequencias[estado.objetoAtivo] || [];
+
+  seq.forEach((item, idx) => {
+    const li = document.createElement('li');
+    li.className = 'sequencia-item';
+
+    const nome = document.createElement('span');
+    nome.className = 'sequencia-item-nome';
+    nome.textContent = item.rotulo || item.nome || `M${idx + 1}`;
+    li.appendChild(nome);
+
+    // Botão de remover
+    const btnRem = document.createElement('button');
+    btnRem.className = 'sequencia-botao-remover';
+    btnRem.textContent = '✕';
+    btnRem.addEventListener('click', () => {
+      estado.sequencias[estado.objetoAtivo].splice(idx, 1);
+      renderizarSequencia();
+      marcarParaRenderizar();
+    });
+
+    // Mover para cima
+    const btnUp = document.createElement('button');
+    btnUp.className = 'sequencia-botao-mover';
+    btnUp.textContent = '↑';
+    btnUp.disabled = idx === 0;
+    btnUp.addEventListener('click', () => {
+      const s = estado.sequencias[estado.objetoAtivo];
+      [s[idx - 1], s[idx]] = [s[idx], s[idx - 1]];
+      renderizarSequencia();
+      marcarParaRenderizar();
+    });
+
+    // Mover para baixo
+    const btnDown = document.createElement('button');
+    btnDown.className = 'sequencia-botao-mover';
+    btnDown.textContent = '↓';
+    btnDown.disabled = idx === seq.length - 1;
+    btnDown.addEventListener('click', () => {
+      const s = estado.sequencias[estado.objetoAtivo];
+      [s[idx], s[idx + 1]] = [s[idx + 1], s[idx]];
+      renderizarSequencia();
+      marcarParaRenderizar();
+    });
+
+    li.appendChild(btnUp);
+    li.appendChild(btnDown);
+    li.appendChild(btnRem);
+    lista.appendChild(li);
+  });
+
+  atualizarResultado();
+}
+
+function atualizarResultado() {
+  const n = estado.dimensaoMatriz;
+  const seq = estado.sequencias[estado.objetoAtivo] || [];
+  const matrizes = seq.map((item) => item.construir(item.params)).filter(Boolean);
+  const resultado = multiplicarSequencia(matrizes, n);
+
+  const grid = document.getElementById('grid-resultado');
+  grid.innerHTML = '';
+  grid.style.gridTemplateColumns = `repeat(${n}, 1fr)`;
+  grid.style.gridTemplateRows = `repeat(${n}, 1fr)`;
+
+  for (let lin = 0; lin < n; lin++) {
+    for (let col = 0; col < n; col++) {
+      const idx = col * n + lin;
+      const span = document.createElement('span');
+      span.className = 'resultado-celula';
+      span.textContent = (+resultado[idx].toFixed(3)).toString();
+      grid.appendChild(span);
+    }
+  }
+
+  marcarParaRenderizar();
+}
+
+// --- Templates ---
+
+const TODOS_TEMPLATES = [
+  {
+    id: 'escala', nome: 'escala(sx,sy)', params: ['sx', 'sy'], dim: [2, 3],
+    construir: (p) => {
+      const [sx, sy] = p;
+      const n = estado.dimensaoMatriz;
+      if (n === 2) return new Float32Array([sx, 0, 0, sy]);
+      return new Float32Array([sx,0,0, 0,sy,0, 0,0,1]);
+    },
+  },
+  {
+    id: 'cis', nome: 'cis(k)', params: ['k'], dim: [3],
+    construir: (p) => {
+      const k = p[0];
+      return new Float32Array([1,0,0, k,1,0, 0,0,1]);
+    },
+  },
+  {
+    id: 'transl', nome: 'transl(x,y)', params: ['x', 'y'], dim: [3],
+    construir: (p) => {
+      const [tx, ty] = p;
+      return new Float32Array([1,0,0, 0,1,0, tx,ty,1]);
+    },
+  },
+  {
+    id: 'rot', nome: 'rot(θ)', params: ['θ'], dim: [3],
+    construir: (p) => {
+      const t = p[0];
+      const c = Math.cos(t), s = Math.sin(t);
+      return new Float32Array([c,s,0, -s,c,0, 0,0,1]);
+    },
+  },
+  {
+    id: 'escala3d', nome: 'escala3d(sx,sy,sz)', params: ['sx', 'sy', 'sz'], dim: [4],
+    construir: (p) => {
+      const [sx, sy, sz] = p;
+      return new Float32Array([sx,0,0,0, 0,sy,0,0, 0,0,sz,0, 0,0,0,1]);
+    },
+  },
+  {
+    id: 'transl3d', nome: 'transl3d(x,y,z)', params: ['x','y','z'], dim: [4],
+    construir: (p) => {
+      const [tx,ty,tz] = p;
+      return new Float32Array([1,0,0,0, 0,1,0,0, 0,0,1,0, tx,ty,tz,1]);
+    },
+  },
+  {
+    id: 'rotX', nome: 'rotX(θ)', params: ['θ'], dim: [4],
+    construir: (p) => {
+      const t=p[0], c=Math.cos(t), s=Math.sin(t);
+      return new Float32Array([1,0,0,0, 0,c,s,0, 0,-s,c,0, 0,0,0,1]);
+    },
+  },
+  {
+    id: 'rotY', nome: 'rotY(θ)', params: ['θ'], dim: [4],
+    construir: (p) => {
+      const t=p[0], c=Math.cos(t), s=Math.sin(t);
+      return new Float32Array([c,0,-s,0, 0,1,0,0, s,0,c,0, 0,0,0,1]);
+    },
+  },
+  {
+    id: 'rotZ', nome: 'rotZ(θ)', params: ['θ'], dim: [4],
+    construir: (p) => {
+      const t=p[0], c=Math.cos(t), s=Math.sin(t);
+      return new Float32Array([c,s,0,0, -s,c,0,0, 0,0,1,0, 0,0,0,1]);
+    },
+  },
+];
+
+function renderizarTemplates() {
+  const lista = document.getElementById('lista-templates');
+  const painel = document.getElementById('painel-direito');
+  const jogo = document.getElementById('jogo-layout');
+  lista.innerHTML = '';
+
+  const n = estado.dimensaoMatriz;
+  const disponiveis = TODOS_TEMPLATES.filter((t) =>
+    estado.templatesDesbloqueados.includes(t.id) &&
+    (!t.dim || t.dim.includes(n))
+  );
+
+  if (disponiveis.length === 0) {
+    if (painel) painel.hidden = true;
+    if (jogo) jogo.style.gridTemplateColumns = 'var(--largura-painel-lateral) 1fr';
+    return;
+  }
+
+  if (painel) painel.hidden = false;
+  if (jogo) jogo.style.gridTemplateColumns = 'var(--largura-painel-lateral) 1fr var(--largura-painel-lateral)';
+
+  disponiveis.forEach((tmpl) => {
+    const li = document.createElement('li');
+    li.className = 'template-item';
+
+    const nome = document.createElement('span');
+    nome.className = 'template-nome';
+    nome.textContent = tmpl.nome;
+    li.appendChild(nome);
+
+    const btnUsar = document.createElement('button');
+    btnUsar.className = 'botao-usar-template';
+    btnUsar.textContent = 'Usar';
+    btnUsar.addEventListener('click', () => abrirModalTemplate(tmpl));
+    li.appendChild(btnUsar);
+
+    lista.appendChild(li);
+  });
+}
+
+// --- Modal de parâmetros de template ---
+
+let _tmplPendente = null;
+
+function abrirModalTemplate(tmpl) {
+  _tmplPendente = tmpl;
+  const modal = document.getElementById('modal-template');
+  document.getElementById('modal-template-titulo').textContent = tmpl.nome;
+
+  const container = document.getElementById('modal-template-parametros');
+  container.innerHTML = '';
+  tmpl.params.forEach((nomep) => {
+    const label = document.createElement('label');
+    label.className = 'modal-parametro-label';
+    label.textContent = nomep;
+
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.className = 'celula-matriz modal-parametro-input';
+    input.placeholder = `ex: π/4 ou 1.5`;
+    input.dataset.param = nomep;
+
+    input.addEventListener('focus', () => { input.dataset.ativo = '1'; });
+    input.addEventListener('blur', () => { delete input.dataset.ativo; });
+
+    container.appendChild(label);
+    container.appendChild(input);
+  });
+
+  // Foca no primeiro input
+  const primeiro = container.querySelector('input');
+  if (primeiro) setTimeout(() => primeiro.focus(), 50);
+
+  // Calculadora do modal insere no input ativo
+  document.querySelectorAll('.modal-calculadora-botao').forEach((btn) => {
+    btn.onclick = () => {
+      const ativo = container.querySelector('input[data-ativo="1"]') || container.querySelector('input');
+      if (!ativo) return;
+      const pos = ativo.selectionStart ?? ativo.value.length;
+      const val = btn.textContent;
+      ativo.value = ativo.value.slice(0, pos) + val + ativo.value.slice(ativo.selectionEnd ?? pos);
+      ativo.focus();
+      ativo.setSelectionRange(pos + val.length, pos + val.length);
+    };
+  });
+
+  modal.hidden = false;
+}
+
+function confirmarModalTemplate() {
+  const tmpl = _tmplPendente;
+  if (!tmpl) return;
+
+  const inputs = document.querySelectorAll('#modal-template-parametros .modal-parametro-input');
+  const params = [];
+  let erro = false;
+
+  inputs.forEach((input) => {
+    const v = avaliarExpressao(input.value);
+    if (v === null) {
+      input.classList.add('celula-erro');
+      erro = true;
+    } else {
+      input.classList.remove('celula-erro');
+      params.push(v);
+    }
+  });
+
+  if (erro) return;
+
+  const nomesFormatados = params.map((p) => {
+    const abs = Math.abs(p);
+    if (Math.abs(abs - Math.PI) < 1e-6) return p < 0 ? '-π' : 'π';
+    if (Math.abs(abs - Math.PI / 2) < 1e-6) return p < 0 ? '-π/2' : 'π/2';
+    if (Math.abs(abs - Math.PI / 4) < 1e-6) return p < 0 ? '-π/4' : 'π/4';
+    if (Math.abs(abs - Math.PI / 3) < 1e-6) return p < 0 ? '-π/3' : 'π/3';
+    if (Math.abs(abs - Math.PI / 6) < 1e-6) return p < 0 ? '-π/6' : 'π/6';
+    return (+p.toFixed(3)).toString();
+  });
+
+  estado.sequencias[estado.objetoAtivo].push({
+    tipo: 'template',
+    rotulo: `${tmpl.id}(${nomesFormatados.join(',')})`,
+    nome: tmpl.nome,
+    params,
+    construir: (p) => tmpl.construir(p),
+  });
+
+  document.getElementById('modal-template').hidden = true;
+  _tmplPendente = null;
+  renderizarSequencia();
+  marcarParaRenderizar();
+}
+
+function registrarModalTemplate() {
+  document.getElementById('modal-botao-confirmar').addEventListener('click', confirmarModalTemplate);
+  document.getElementById('modal-botao-cancelar').addEventListener('click', () => {
+    document.getElementById('modal-template').hidden = true;
+    _tmplPendente = null;
+  });
+  // Enter confirma
+  document.getElementById('modal-template').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') confirmarModalTemplate();
+    if (e.key === 'Escape') {
+      document.getElementById('modal-template').hidden = true;
+      _tmplPendente = null;
+    }
+  });
+}
+
+// --- Títulos dinâmicos (objeto selecionado) ---
+
+function atualizarTitulosObjeto() {
+  const nome = estado.objetos[estado.objetoAtivo]?.nome || '';
+  document.getElementById('titulo-construtor').textContent = nome ? `Construtor — ${nome}` : 'Construtor';
+  document.getElementById('titulo-sequencia').textContent = nome ? `Sequência — ${nome}` : 'Sequência';
+}
+
+// Seletor explícito evita ambiguidades quando objetos começam sobrepostos.
+function renderizarSeletorObjetos() {
+  const seletor = document.getElementById('seletor-objetos');
+  seletor.innerHTML = '';
+  seletor.hidden = estado.objetos.length <= 1;
+  if (seletor.hidden) return;
+
+  estado.objetos.forEach((obj, idx) => {
+    const btn = document.createElement('button');
+    btn.className = 'objeto-chip' + (idx === estado.objetoAtivo ? ' ativo' : '');
+    btn.textContent = obj.nome;
+    btn.type = 'button';
+    btn.addEventListener('click', () => selecionarObjeto(idx));
+    seletor.appendChild(btn);
+  });
+}
+
+function selecionarObjeto(idx) {
+  if (idx < 0 || idx >= estado.objetos.length || idx === estado.objetoAtivo) return;
+  estado.objetoAtivo = idx;
+  renderizarSequencia();
+  atualizarTitulosObjeto();
+  renderizarSeletorObjetos();
+  marcarParaRenderizar();
+}
+
+// --- Utilitário de formatação ---
+
+function formatarMatriz(m, n) {
+  let s = '';
+  for (let lin = 0; lin < n; lin++) {
+    for (let col = 0; col < n; col++) {
+      s += (+m[col * n + lin].toFixed(3)).toString().padStart(8);
+    }
+    s += '\n';
+  }
+  return s;
+}
+
+// ── js/telas/menu.js ──
+// Lógica da tela de menu inicial
+
+function inicializarMenu(navegarPara) {
+  const btnIniciar = document.getElementById('botao-iniciar');
+
+  btnIniciar.addEventListener('click', () => {
+    navegarPara('selecao');
+  });
+}
+
+// ── js/telas/creditos.js ──
+// Lógica da tela de créditos
+
+function inicializarCreditos(navegarPara) {
+  document.getElementById('botao-voltar-inicio').addEventListener('click', () => {
+    navegarPara('menu');
+  });
+}
+
+// ── js/telas/select.js ──
+// Lógica da tela de seleção de fases
+
+
+
+
+const MUNDOS = [
+  { nome: 'Mundo 1 — Transformações 2D', fases: [0, 1, 2, 3, 4, 5, 6] },
+  { nome: 'Mundo 2 — Transformações 3D', fases: [7, 8, 9, 10, 11, 12] },
+  { nome: 'Mundo 3 — Múltiplos objetos 2D', fases: [13, 14, 15] },
+  { nome: 'Mundo 4 — Múltiplos objetos 3D', fases: [16, 17] },
+];
+
+// aoSelecionarFase(idx): callback injetado pelo main.js para evitar dependência circular com jogo.js
+let _aoSelecionarFase = null;
+let _navegarPara = null;
+
+function inicializarSelecao(navegarPara, aoSelecionarFase) {
+  _navegarPara = navegarPara;
+  _aoSelecionarFase = aoSelecionarFase;
+
+  const btnVoltar = document.getElementById('botao-voltar-menu');
+  btnVoltar.addEventListener('click', () => navegarPara('menu'));
+}
+
+// Redesenha a grade ao voltar para a tela, para refletir progresso atualizado
+function renderizarGrade() {
+  const grade = document.getElementById('grade-mundos');
+  grade.innerHTML = '';
+
+  MUNDOS.forEach((mundo) => {
+    const secao = document.createElement('div');
+    secao.className = 'mundo-secao';
+
+    const titulo = document.createElement('h3');
+    titulo.className = 'mundo-titulo';
+    titulo.textContent = mundo.nome;
+    secao.appendChild(titulo);
+
+    const grid = document.createElement('div');
+    grid.className = 'mundo-fases';
+
+    mundo.fases.forEach((idxFase) => {
+      const fase = obterFase(idxFase);
+      const desbloqueada = true; // TODO: restaurar progressão após testes
+      const completa = estado.fasesCompletas.has(idxFase);
+
+      const card = document.createElement('button');
+      card.className = 'fase-card' + (desbloqueada ? '' : ' bloqueada') + (completa ? ' completa' : '');
+
+      const icone = document.createElement('span');
+      icone.className = 'fase-icone';
+      icone.textContent = completa ? '✓' : desbloqueada ? '▶' : '🔒';
+
+      const numero = document.createElement('span');
+      numero.className = 'fase-numero';
+      numero.textContent = `Fase ${idxFase + 1}`;
+
+      const nome = document.createElement('span');
+      nome.className = 'fase-nome-card';
+      nome.textContent = fase.nome;
+
+      card.appendChild(icone);
+      card.appendChild(numero);
+      card.appendChild(nome);
+
+      if (desbloqueada) {
+        card.addEventListener('click', () => {
+          estado.faseAtual = idxFase;
+          _aoSelecionarFase(idxFase);
+          _navegarPara('jogo');
+        });
+      }
+
+      grid.appendChild(card);
+    });
+
+    secao.appendChild(grid);
+    grade.appendChild(secao);
+  });
+}
+
+// ── js/telas/jogo.js ──
+// Render e lógica da tela de jogo principal
+
+
+
+
+
+
+
+let webglInicializado = false;
+let navegarParaFn = null;
+let aoVoltarSelecaoFn = null;
+let ignorarProximoClique = false;
+
+function inicializarJogo(navegarPara, aoVoltarSelecao) {
+  navegarParaFn = navegarPara;
+  aoVoltarSelecaoFn = aoVoltarSelecao;
+
+  const canvas = document.getElementById('canvas-jogo');
+
+  if (!inicializarWebGL(canvas)) return;
+  iniciarLoop(canvas);
+  webglInicializado = true;
+
+  // Botão de voltar à seleção
+  document.getElementById('botao-voltar-selecao').addEventListener('click', () => {
+    if (aoVoltarSelecaoFn) aoVoltarSelecaoFn();
+    navegarPara('selecao');
+  });
+
+  // Verificar vitória
+  document.getElementById('botao-verificar').addEventListener('click', verificarVitoria);
+
+  // Fechar diálogo
+  document.getElementById('botao-fechar-dialogo').addEventListener('click', () => {
+    document.getElementById('barra-dialogo').hidden = true;
+  });
+
+  // Seleção de objeto por clique no canvas
+  canvas.addEventListener('click', (e) => selecionarObjetoPorClique(e, canvas));
+
+  // Pan da câmera via teclado e mouse
+  registrarNavegacaoCanvas(canvas);
+
+  registrarCalculadora();
+  registrarSalvarMatriz();
+  registrarSequencia();
+  registrarModalTemplate();
+}
+
+function carregarFase(idxFase) {
+  const fase = obterFase(idxFase);
+  estado.faseAtual = idxFase;
+  estado.dadosFase = fase;
+  estado.dimensaoMatriz = fase.dimensao;
+  estado.modo3D = fase.modo3D;
+  estado.templatesDesbloqueados = fase.templates ? [...fase.templates] : [];
+  estado.panX = 0;
+  estado.panY = 0;
+  estado.orbitTheta = ORBIT_THETA_INICIAL;
+  estado.orbitPhi   = ORBIT_PHI_INICIAL;
+
+  // Mostra/oculta o overlay de labels dos eixos
+  const labelCanvas = document.getElementById('canvas-labels');
+  if (labelCanvas) labelCanvas.style.display = fase.modo3D ? 'block' : 'none';
+
+  // Copia os objetos da fase para o estado, preservando imutabilidade da definição
+  estado.objetos = fase.objetos.map((obj) => ({ ...obj }));
+  estado.objetoAtivo = 0;
+
+  reiniciarFase();
+  sincronizarSequencias();
+
+  // Atualiza nome da fase
+  document.getElementById('fase-nome').textContent = `Fase ${idxFase + 1} — ${fase.nome}`;
+
+  // Mostra diálogo de introdução
+  exibirDialogo(fase.dialogo);
+
+  // Renderiza todos os painéis
+  renderizarConstrutor();
+  renderizarSequencia();
+  renderizarSalvas();
+  renderizarTemplates();
+  atualizarTitulosObjeto();
+  renderizarSeletorObjetos();
+
+  marcarParaRenderizar();
+}
+
+// --- Verificação de vitória ---
+
+function verificarVitoria() {
+  const fase = estado.dadosFase;
+  if (!fase) return;
+
+  const n = estado.dimensaoMatriz;
+
+  // Fases com múltiplos combos válidos (ex: encaixe-cruz)
+  if (fase.combosValidos) {
+    const correto = fase.combosValidos.some((combo) =>
+      estado.objetos.every((_, idx) =>
+        matrizesSaoIguais(calcularMatrizAcumulada(idx), combo[idx], n)
+      )
+    );
+    if (correto) aoVencer(); else aoErrar();
+    return;
+  }
+
+  let todosCorretos = true;
+
+  estado.objetos.forEach((obj, idx) => {
+    const matrizAlvo = fase.matrizAlvoObjetos
+      ? fase.matrizAlvoObjetos[idx]
+      : fase.matrizAlvo;
+
+    const matrizResultante = calcularMatrizAcumulada(idx);
+
+    const correto = matrizesSaoIguais(matrizResultante, matrizAlvo, n);
+
+    if (!correto) todosCorretos = false;
+  });
+
+  if (todosCorretos) {
+    aoVencer();
+  } else {
+    aoErrar();
+  }
+}
+
+
+function aoVencer() {
+  const fase = estado.dadosFase;
+  const idxFase = estado.faseAtual;
+
+  // Marca fase como completa
+  estado.fasesCompletas.add(idxFase);
+
+  // CG: ativa o pulso emissivo nos materiais sem alterar matrizes ou geometria.
+  triggerSuccessFeedback();
+
+  // Animação de vitória
+  const canvas = document.getElementById('canvas-jogo');
+  canvas.classList.add('canvas-vitoria');
+  setTimeout(() => canvas.classList.remove('canvas-vitoria'), 1000);
+
+  // Diálogo de vitória
+  exibirDialogo('Correto! Fase concluída. Você desbloqueou novos recursos.');
+
+  // Avança para próxima fase ou créditos após delay
+  setTimeout(() => {
+    const proximo = idxFase + 1;
+    if (proximo < totalFases()) {
+      estado.faseAtual = proximo;
+      carregarFase(proximo);
+    } else {
+      navegarParaFn('creditos');
+    }
+  }, 2000);
+}
+
+function aoErrar() {
+  // CG: o shader recebe um pulso vermelho; o shake CSS continua como reforço visual.
+  triggerErrorFeedback();
+  const canvas = document.getElementById('canvas-jogo');
+  canvas.classList.add('canvas-erro');
+  setTimeout(() => canvas.classList.remove('canvas-erro'), 600);
+  exibirDialogo('Não é bem isso... Tente ajustar a sequência ou os valores.');
+  // Fecha automaticamente após 2s para não bloquear os painéis inferiores
+  setTimeout(() => {
+    document.getElementById('barra-dialogo').hidden = true;
+  }, 2000);
+}
+
+// --- Seleção de objeto por clique no canvas ---
+
+function selecionarObjetoPorClique(e, canvas) {
+  if (ignorarProximoClique) {
+    ignorarProximoClique = false;
+    return;
+  }
+  if (estado.objetos.length <= 1) return;
+
+  const rect = canvas.getBoundingClientRect();
+  const cx = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+  const cy = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+
+  let melhorIdx = estado.objetoAtivo;
+  let melhorDist = Infinity;
+
+  estado.objetos.forEach((_, idx) => {
+    const centro = projetarCentroObjeto(idx, canvas);
+    if (!centro) return;
+    const dx = cx - centro[0];
+    const dy = cy - centro[1];
+    const dist = dx * dx + dy * dy;
+    if (dist < melhorDist) {
+      melhorDist = dist;
+      melhorIdx = idx;
+    }
+  });
+
+  selecionarObjeto(melhorIdx);
+}
+
+// --- Navegação do canvas (pan 2D / órbita 3D) ---
+
+const ORBIT_THETA_INICIAL = Math.PI * 0.25;
+const ORBIT_PHI_INICIAL   = Math.PI * 0.15;
+
+function registrarNavegacaoCanvas(canvas) {
+  let arrastando = false;
+  let ultimoX = 0;
+  let ultimoY = 0;
+  let distanciaArraste = 0;
+
+  canvas.setAttribute('tabindex', '0');
+  canvas.addEventListener('keydown', (e) => {
+    const delta = 0.05;
+    if (estado.modo3D) {
+      // Setas orbitam a câmera em 3D
+      if (e.key === 'ArrowLeft')  { estado.orbitTheta -= delta; e.preventDefault(); }
+      if (e.key === 'ArrowRight') { estado.orbitTheta += delta; e.preventDefault(); }
+      if (e.key === 'ArrowUp')    { estado.orbitPhi = Math.min(Math.PI/2 - 0.05, estado.orbitPhi + delta); e.preventDefault(); }
+      if (e.key === 'ArrowDown')  { estado.orbitPhi = Math.max(-Math.PI/2 + 0.05, estado.orbitPhi - delta); e.preventDefault(); }
+    } else {
+      // Setas fazem pan em 2D
+      if (e.key === 'ArrowLeft')  { estado.panX -= delta; e.preventDefault(); }
+      if (e.key === 'ArrowRight') { estado.panX += delta; e.preventDefault(); }
+      if (e.key === 'ArrowUp')    { estado.panY += delta; e.preventDefault(); }
+      if (e.key === 'ArrowDown')  { estado.panY -= delta; e.preventDefault(); }
+    }
+    marcarParaRenderizar();
+  });
+
+  canvas.addEventListener('mousedown', (e) => {
+    if (e.button !== 0) return;
+    arrastando = true;
+    ignorarProximoClique = false;
+    ultimoX = e.clientX;
+    ultimoY = e.clientY;
+    distanciaArraste = 0;
+  });
+
+  canvas.addEventListener('mousemove', (e) => {
+    if (!arrastando) return;
+    const rect = canvas.getBoundingClientRect();
+    const dx = (e.clientX - ultimoX) / rect.width;
+    const dy = (e.clientY - ultimoY) / rect.height;
+    distanciaArraste += Math.abs(e.clientX-ultimoX)+Math.abs(e.clientY-ultimoY);
+    if (distanciaArraste > 4) ignorarProximoClique = true;
+
+    if (estado.modo3D) {
+      estado.orbitTheta += dx * Math.PI * 2;
+      estado.orbitPhi = Math.max(-Math.PI/2 + 0.05,
+                        Math.min( Math.PI/2 - 0.05, estado.orbitPhi - dy * Math.PI));
+    } else {
+      estado.panX += dx * 2;
+      estado.panY -= dy * 2;
+    }
+
+    ultimoX = e.clientX;
+    ultimoY = e.clientY;
+    marcarParaRenderizar();
+  });
+
+  canvas.addEventListener('mouseup', () => { arrastando = false; });
+  canvas.addEventListener('mouseleave', () => { arrastando = false; });
+
+  canvas.addEventListener('dblclick', () => {
+    if (estado.modo3D) {
+      estado.orbitTheta = ORBIT_THETA_INICIAL;
+      estado.orbitPhi   = ORBIT_PHI_INICIAL;
+    } else {
+      estado.panX = 0;
+      estado.panY = 0;
+    }
+    marcarParaRenderizar();
+  });
+}
+
+// --- Diálogo ---
+
+function exibirDialogo(texto) {
+  if (!texto) return;
+  document.getElementById('dialogo-texto').textContent = texto;
+  document.getElementById('barra-dialogo').hidden = false;
+}
+
+// ── js/main.js ──
+// Ponto de entrada — inicializa a SPA e gerencia o roteamento entre telas
+// main.js é o único módulo que conecta select.js e jogo.js, evitando dependência circular
+
+
+
+
+
+
+
+
+const telas = {
+  menu: document.getElementById('tela-menu'),
+  selecao: document.getElementById('tela-selecao'),
+  jogo: document.getElementById('tela-jogo'),
+  creditos: document.getElementById('tela-creditos'),
+};
+
+// Troca a tela visível sem recarregar a página
+// renderizarGrade é chamado aqui para que a grade seja atualizada ao navegar,
+// independente do ponto de origem (menu ou volta do jogo)
+function navegarPara(nomeTela) {
+  for (const [nome, el] of Object.entries(telas)) {
+    el.hidden = nome !== nomeTela;
+  }
+  if (nomeTela === 'selecao') renderizarGrade();
+  estado.precisaRenderizar = true;
+}
+
+function inicializar() {
+  // Inicializa todas as telas e registra callbacks de navegação, eliminando dependências circulares
+  inicializarMenu(navegarPara);
+  inicializarSelecao(navegarPara, carregarFase);
+  inicializarJogo(navegarPara, renderizarGrade);
+  inicializarCreditos(navegarPara);
+
+  navegarPara('menu');
+}
+
+document.addEventListener('DOMContentLoaded', inicializar);
+</script>
+</body>
+</html>

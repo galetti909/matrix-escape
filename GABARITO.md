@@ -1,6 +1,6 @@
 # Gabarito explicado — Matrix Escape
 
-Este arquivo acompanha a versão validada das 20 fases. As matrizes abaixo são exibidas por linhas, como aparecem no construtor, embora internamente o WebGL as armazene em column-major.
+Este arquivo acompanha a versão atual do jogo com 18 fases. As matrizes abaixo são exibidas por linhas, como aparecem no construtor, embora internamente o WebGL as armazene em column-major.
 
 ## Como ler uma sequência
 
@@ -142,13 +142,13 @@ M = T × S
 
 A diagonal escala X/Y/Z; a quarta coluna desloca o cubo sem ter seus valores multiplicados pela escala.
 
-## Fase 9 — Rotação em X e Y
+## Fase 9 — Rotação X e Y
 
 **Sequência:**
 
-1. `rotX(π/4)` — pode ser construída manualmente;
-2. `rotY(π/6)` — pode ser construída manualmente;
-3. `transl3d(0.7, 0.3, 0)`.
+1. `rotX(π/4)`
+2. `rotY(π/6)`
+3. `transl3d(0.7, 0.3, 0)`
 
 ```text
 M = T × Ry × Rx
@@ -165,10 +165,12 @@ Rx mistura Y/Z; Ry mistura X/Z. A translação ocorre por último.
 
 **Sequência:**
 
-1. `rotZ(π/3)` — construa a rotação de 60°;
-2. `transl3d(0.6, 0.5, 0)`.
+1. `rotZ(π/3)`
+2. `transl3d(0.6, 0.5, 0)`
 
 ```text
+M = T × Rz
+
 0.5    -0.8660  0  0.6
 0.8660  0.5     0  0.5
 0       0       1  0
@@ -185,6 +187,8 @@ A submatriz superior esquerda é a mesma rotação usada em 2D; Z permanece inal
 2. `transl3d(0.9, 0.3, 0)`
 
 ```text
+M = T × Rx
+
 1  0       0       0.9
 0  0.7071 -0.7071  0.3
 0  0.7071  0.7071  0
@@ -312,29 +316,7 @@ Cubo A                         Cubo B
 0 0 0  1                      0 0 0  1
 ```
 
-## Fase 18 — Hierarquia pai-filho
-
-**Pai:** `rotY(π/4)`.
-
-```text
- 0.7071  0  0.7071  0
- 0       1  0       0
--0.7071  0  0.7071  0
- 0       0  0       1
-```
-
-**Filho, em coordenadas locais:** `transl3d(0.5, 0, 0)`.
-
-```text
-1 0 0 0.5
-0 1 0 0
-0 0 1 0
-0 0 0 1
-```
-
-A matriz mundial do filho é `Mpai × Mfilho`. Portanto, sua translação local também acompanha a rotação do pai.
-
-## Fase 19 — Três peças
+## Fase 18 — Três peças
 
 **Peça A:** `transl3d(-0.6, 0.3, 0)`.
 
@@ -363,28 +345,10 @@ A matriz mundial do filho é `Mpai × Mfilho`. Portanto, sua translação local 
 0 0 0  1
 ```
 
-## Fase 20 — Portal: Computação Gráfica
-
-**Conceitos visuais:** textura procedural, UV, iluminação Phong, especular, Fresnel, emissividade e transparência.
-
-**Template:** `transl3d(1.15, 1, -0.2)`.
-
-```text
-1  0  0  1.15
-0  1  0  1
-0  0  1 -0.2
-0  0  0  1
-```
-
-A placa já possui forma, textura e orientação corretas. Ela precisa apenas ser deslocada até o portal holográfico.
-
 ---
 
 ## Verificação automática
 
-As respostas deste arquivo são verificadas contra as definições reais das fases com:
-
 ```bash
 node scripts/validar-fases.mjs
 ```
-

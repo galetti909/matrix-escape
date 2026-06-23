@@ -98,13 +98,6 @@ export function cisalhamento2x2(kx, ky) {
   return new Float32Array([1, ky, kx, 1]);
 }
 
-export function multiplicar2x2(A, B) {
-  return new Float32Array([
-    A[0]*B[0] + A[2]*B[1],  A[1]*B[0] + A[3]*B[1],
-    A[0]*B[2] + A[2]*B[3],  A[1]*B[2] + A[3]*B[3],
-  ]);
-}
-
 // --- Matrizes 3D (4×4 homogêneas, column-major) ---
 
 export function escala3D(sx, sy, sz) {
@@ -187,11 +180,6 @@ export function perspectiva(fovRad, aspect, near, far) {
     0, 0, (near + far) * rangeInv, -1,
     0, 0, near * far * rangeInv * 2, 0,
   ]);
-}
-
-// Converte uma matriz 3×3 para Float32Array (caso já seja uma array JS normal)
-export function paraFloat32(valores, n) {
-  return new Float32Array(valores.slice(0, n * n));
 }
 
 // Verifica se duas matrizes são "iguais" dentro de uma tolerância

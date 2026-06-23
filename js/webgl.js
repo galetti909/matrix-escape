@@ -11,7 +11,6 @@ let programa3D = null;
 let programaMaterial3D = null;
 let programaGrid = null;
 let programaTracejado = null;
-let programaTracejado3D = null;
 let bufferVertices = null;
 let bufferGrid = null;
 let bufferEixos2D = null;
@@ -216,7 +215,6 @@ export function inicializarWebGL(canvas) {
   programaMaterial3D = criarPrograma(VERT_MATERIAL_3D, FRAG_MATERIAL_3D);
   programaGrid = criarPrograma(VERT_GRID, FRAG_GRADE);
   programaTracejado = criarPrograma(VERT_2D, FRAG_TRACEJADO);
-  programaTracejado3D = criarPrograma(VERT_3D, FRAG_TRACEJADO);
 
   bufferVertices = gl.createBuffer();
   bufferGrid = gl.createBuffer();
@@ -384,7 +382,7 @@ export function triggerErrorFeedback() {
   estado.precisaRenderizar = true;
 }
 
-export function updateFeedbackState(agora = performance.now()) {
+function updateFeedbackState(agora = performance.now()) {
   const feedback = estado.feedback;
   if (!feedback || feedback.modo === 0) return false;
   if (agora - feedback.inicio >= feedback.duracao) {
@@ -395,7 +393,7 @@ export function updateFeedbackState(agora = performance.now()) {
   return true;
 }
 
-export function getFeedbackUniforms(agora = performance.now()) {
+function getFeedbackUniforms(agora = performance.now()) {
   const feedback = estado.feedback;
   if (!feedback || feedback.modo === 0) {
     return { modo: 0, glow: 0, tempo: agora / 1000 };
@@ -986,6 +984,3 @@ export function marcarParaRenderizar() {
   estado.precisaRenderizar = true;
 }
 
-export function obterGL() {
-  return gl;
-}
